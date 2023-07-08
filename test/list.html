@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>YouTube Playlist Videos</title>
+  </head>
+  <body>
+    <h1>YouTube Playlist Videos</h1>
+    <ul id="video-names"></ul>
+
+    <script>
+      // Function to load data from a YouTube playlist page
+      async function loadPlaylistData(url) {
+        // Fetch the HTML content of the page
+        const response = await fetch(url);
+        const html = await response.text();
+
+        // Create a DOM parser
+        const parser = new DOMParser();
+
+        // Parse the HTML response
+        const doc = parser.parseFromString(html, 'text/html');
+
+        // Extract data from the parsed HTML
+        const videoNames = Array.from(doc.querySelectorAll('a#video-title')).map(a => a.textContent);
+
+        // Create a JSON object from the extracted data
+        const json = { videoNames };
+
+        // Log the JSON object
+        console.log(json);
+
+        // Display the video names on the page
+        const videoNamesList = document.querySelector('#video-names');
+        videoNames.forEach(name => {
+          const li = document.createElement('li');
+          li.textContent = name;
+          videoNamesList.appendChild(li);
+        });
+      }
+
+      // Load data from the playlist when the page loads
+      window.addEventListener('load', () => {
+        loadPlaylistData('https://www.youtube.com/playlist?list=PL91oEcVvcstCNJDoYm2zWZavhfWX483y-');
+      });
+    </script>
+  </body>
+</html>
