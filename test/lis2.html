@@ -11,11 +11,16 @@
       // Function to load data from a YouTube playlist page
       async function loadPlaylistData(url) {
         // Prefix the URL with the CORS Anywhere API URL
-        const corsAnywhereUrl = 'https://cors.proxy.consumet.org/';
+        const corsAnywhereUrl = 'https://cors-anywhere.herokuapp.com/';
         const corsUrl = corsAnywhereUrl + url;
 
         // Fetch the HTML content of the page
-        const response = await fetch(corsUrl);
+        const response = await fetch(corsUrl, {
+          headers: {
+            'origin': window.location.origin,
+            'x-requested-with': 'XMLHttpRequest'
+          }
+        });
         const html = await response.text();
 
         // Create a DOM parser
