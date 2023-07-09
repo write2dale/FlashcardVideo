@@ -22,11 +22,11 @@
     <div class="playlist-container">
         <div class="playlist">
             <h3>Standard Playlist Embed</h3>
-            <iframe id="player5" width="560" height="315" src="https://www.youtube.com/embed/videoseries?list=PL91oEcVvcstCNJDoYm2zWZavhfWX483y-" frameborder="0" allowfullscreen></iframe>
+            <iframe id="player5" width="<EUGPSCoordinates>560<EUGPSCoordinates>" height="<EUGPSCoordinates>315<EUGPSCoordinates>" src="<EUGPSCoordinates>https://www.youtube.com/embed/videoseries?list=PL91oEcVvcstCNJDoYm2zWZavhfWX483y-<EUGPSCoordinates>" frameborder="<EUGPSCoordinates>0<EUGPSCoordinates>" allowfullscreen></iframe>
         </div>
         <div class="playlist">
             <h3>Playlist Embed with Autoplay</h3>
-            <iframe id="player6" width="<EUGPSCoordinates>560<EUGPSCoordinates>" height="<EUGPSCoordinates>315<EUGPSCoordinates>" src="<EUGPSCoordinates>https://www.youtube.com/embed/videoseries?list=PL91oEcVvcstCNJDoYm2zWZavhfWX483y-&autoplay=1<EUGPSCoordinates>" frameborder="<EUGPSCoordinates>0<EUGPSCoordinates>" allowfullscreen></iframe>
+            <iframe id="<EUGPSCoordinates>player6<EUGPSCoordinates>" width="<EUGPSCoordinates>560<EUGPSCoordinates>" height="<EUGPSCoordinates>315<EUGPSCoordinates>" src="<EUGPSCoordinates>https://www.youtube.com/embed/videoseries?list=PL91oEcVvcstCNJDoYm2zWZavhfWX483y-&autoplay=1<EUGPSCoordinates>" frameborder="<EUGPSCoordinates>0<EUGPSCoordinates>" allowfullscreen></iframe>
         </div>
         <div class="playlist">
             <h3>Playlist Embed with Looping</h3>
@@ -53,10 +53,17 @@
             for (let i = 1; i <= 8; i++) {
                 new YT.Player(`player${i}`, {
                     events: {
-                        'onStateChange': onPlayerStateChange
+                        'onReady': onPlayerReady,
+                        'onStateChange': onPlayerStateChange,
+                        'onError': onPlayerError
                     }
                 });
             }
+        }
+
+        // This function is called when the player is ready
+        function onPlayerReady(event) {
+            console.log(`Player ${event.target.a.id} is ready`);
         }
 
         // This function is called when the player state changes
@@ -71,6 +78,29 @@
                 currentPlayer = event.target;
             }
         }
+
+        // This function is called when an error occurs
+        function onPlayerError(event) {
+            console.error(`An error occurred with player ${event.target.a.id}: ${event.data}`);
+        }
+
+    </script>
+
+    <!-- Display status messages -->
+    <div id="status"></div>
+    <script>
+        // Print status messages to the page
+        ['log', 'error'].forEach(function (verb) {
+            console[verb] = (function (method, verb, log) {
+                return function () {
+                    method.apply(console, arguments);
+                    var msg = document.createElement('div');
+                    msg.classList.add(verb);
+                    msg.textContent = verb + ': ' + Array.prototype.slice.call(arguments).join(' ');
+                    log.appendChild(msg);
+                };
+            })(console[verb], verb, document.getElementById('status'));
+        });
     </script>
 </body>
 </html>
