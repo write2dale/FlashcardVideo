@@ -1,0 +1,127 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>YouTube Video Data</title>
+  <style>
+    /* Add some styles for the video grid and elements */
+    #video-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+      grid-gap: 10px;
+    }
+
+    .video {
+      padding: 10px;
+      border: 1px solid black;
+    }
+
+    .video img {
+      width: 100%;
+    }
+
+    .video a {
+      display: block;
+      font-weight: bold;
+    }
+
+    .video span {
+      display: inline-block;
+      margin-right: 10px;
+    }
+  </style>
+</head>
+<body>
+  <h1>YouTube Video Data</h1>
+  <div id="video-grid">
+    <!-- The videos will be displayed here -->
+  </div>
+  <script>
+    // Replace this with your own YouTube API key
+    const API_KEY = "AIzaSyBJdWbBtJZZ5Y7iLoCEgfFecp2jr-_Rx-c";
+
+    // Replace this with the playlist ID you want to use
+    const PLAYLIST_ID = "PL91oEcVvcstCNJDoYm2zWZavhfWX483y-";
+
+    // The URL to fetch the playlist items from the YouTube API
+    const URL = `https://www.googleapis.com/youtube/v3/playlistItems?part=snippet%2CcontentDetails%2Cstatus&playlistId=${PLAYLIST_ID}&key=${API_KEY}`;
+
+    // The element where the videos will be displayed
+    const videoGrid = document.getElementById("video-grid");
+
+    // A function that creates a video element from a playlist item object
+    function createVideoElement(item) {
+      // Get the video ID, title, thumbnail URL, view count, like count and comment count from the item object
+      const videoId = item.contentDetails.videoId;
+      const title = item.snippet.title;
+      const thumbnailUrl = item.snippet.thumbnails.medium.url;
+      const viewCount = item.status.viewCount;
+      const likeCount = item.status.likeCount;
+      const commentCount = item.status.commentCount;
+
+      // Create a div element for the video
+      const videoDiv = document.createElement("div");
+      videoDiv.className = "video";
+
+      // Create an image element for the thumbnail
+      const thumbnailImg = document.createElement("img");
+      thumbnailImg.src = thumbnailUrl;
+      thumbnailImg.alt = title;
+
+      // Create a link element for the title
+      const titleLink = document.createElement("a");
+      titleLink.href = `https://www.youtube.com/watch?v=${videoId}`;
+      titleLink.target = "_blank";
+      titleLink.textContent = title;
+
+      // Create a span element for the view count
+      const viewSpan = document.createElement("span");
+      viewSpan.textContent = `${viewCount} views`;
+
+      // Create a span element for the like count
+      const likeSpan = document.createElement("span");
+      likeSpan.textContent = `${likeCount} likes`;
+
+      // Create a span element for the comment count
+      const commentSpan = document.createElement("span");
+      commentSpan.textContent = `${commentCount} comments`;
+
+      // Append the elements to the video div
+      videoDiv.appendChild(thumbnailImg);
+      videoDiv.appendChild(titleLink);
+      videoDiv.appendChild(viewSpan);
+      videoDiv.appendChild(likeSpan);
+      videoDiv.appendChild(commentSpan);
+
+      // Return the video div
+      return videoDiv;
+    }
+
+    // A function that fetches the data from the YouTube API and displays the videos in the grid
+    function displayVideos() {
+      // Fetch the data from the URL
+      fetch(URL)
+        .then(response => response.json())
+        .then(data => {
+          // Get the items array from the data object
+          const items = data.items;
+
+          // Loop through each item in the array
+          for (let item of items) {
+            // Create a video element from the item object
+            const videoElement = createVideoElement(item);
+
+            // Append the video element to the grid
+            videoGrid.appendChild(videoElement);
+          }
+        })
+        .catch(error => {
+          // Handle any errors that may occur
+          console.error(error);
+        });
+    }
+
+    // Call the displayVideos function when the window loads
+    window.onload = displayVideos;
+  </script>
+</body>
+</html>
