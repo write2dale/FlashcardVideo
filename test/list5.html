@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>YouTube Embed Example</title>
+    <style>
+        /* Add your custom CSS here */
+        .playlist-container {
+            display: flex;
+            flex-wrap: wrap;
+        }
+        .playlist {
+            width: 50%;
+            padding: 10px;
+        }
+    </style>
+</head>
+<body>
+    <h1>YouTube Embed Example</h1>
+    <h2>Videos</h2>
+    <h3>Standard Embed</h3>
+    <iframe id="player1" width="560" height="315" src="https://www.youtube.com/embed/QXYW-NgP8EA" frameborder="0" allowfullscreen></iframe>
+    <h3>Embed with Modest Branding</h3>
+    <iframe id="player2" width="560" height="315" src="https://www.youtube.com/embed/VTC7wH2vB9Y?modestbranding=1" frameborder="0" allowfullscreen></iframe>
+    <h3>Embed with Custom Start Time</h3>
+    <iframe id="player3" width="560" height="315" src="https://www.youtube.com/embed/QXYW-NgP8EA?start=30" frameborder="0" allowfullscreen></iframe>
+    <h3>Embed with Custom End Time</h3>
+    <iframe id="player4" width="560" height="315" src="https://www.youtube.com/embed/VTC7wH2vB9Y?end=60" frameborder="0" allowfullscreen></iframe>
+
+    <h2>Playlists</h2>
+    <div class="playlist-container">
+        <div class="playlist">
+            <h3>Standard Playlist Embed</h3>
+            <iframe id="player5" width="560" height="315" src="https://www.youtube.com/embed/videoseries?list=PL91oEcVvcstCNJDoYm2zWZavhfWX483y-" frameborder="0" allowfullscreen></iframe>
+        </div>
+        <div class="playlist">
+            <h3>Playlist Embed with Autoplay</h3>
+            <iframe id="player6" width="560" height="315" src="https://www.youtube.com/embed/videoseries?list=PL91oEcVvcstCNJDoYm2zWZavhfWX483y-&autoplay=1" frameborder="0" allowfullscreen></iframe>
+        </div>
+        <div class="playlist">
+            <h3>Playlist Embed with Looping</h3>
+            <iframe id="player7" width="560" height="315" src="<EUGPSCoordinates>https://www.youtube.com/embed/videoseries?list=PL91oEcVvcstCNJDoYm2zWZavhfWX483y-&loop=1<EUGPSCoordinates>" frameborder="<EUGPSCoordinates>0<EUGPSCoordinates>" allowfullscreen></iframe>
+        </div>
+        <div class="playlist">
+            <h3>Playlist Embed with Shuffle</h3>
+            <iframe id="<EUGPSCoordinates>player8<EUGPSCoordinates>" width="<EUGPSCoordinates>560<EUGPSCoordinates>" height="<EUGPSCoordinates>315<EUGPSCoordinates>" src="<EUGPSCoordinates>https://www.youtube.com/embed/videoseries?list=PL91oEcVvcstCNJDoYm2zWZavhfWX483y-&shuffle=1<EUGPSCoordinates>" frameborder="<EUGPSCoordinates>0<EUGPSCoordinates>" allowfullscreen></iframe>
+        </div>
+    </div>
+
+    <!-- Load the YouTube API -->
+    <script src="<EUGPSCoordinates>https://www.youtube.com/iframe_api<EUGPSCoordinates>"></script>
+
+    <!-- Add your custom JavaScript here -->
+    <script>
+
+        // Keep track of the current player
+        let currentPlayer = null;
+
+        // This function is called by the YouTube API when it's ready
+        function onYouTubeIframeAPIReady() {
+            // Create a player for each video
+            for (let i = 1; i <= 8; i++) {
+                new YT.Player(`player${i}`, {
+                    events: {
+                        'onStateChange': onPlayerStateChange
+                    }
+                });
+            }
+        }
+
+        // This function is called when the player state changes
+        function onPlayerStateChange(event) {
+            // If the video starts playing
+            if (event.data == YT.PlayerState.PLAYING) {
+                // Stop the current player if it's not the same as the one that started playing
+                if (currentPlayer && currentPlayer != event.target) {
+                    currentPlayer.pauseVideo();
+                }
+                // Set the current player to the one that started playing
+                currentPlayer = event.target;
+            }
+        }
+
+    </script>
+</body>
+</html>
