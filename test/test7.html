@@ -130,89 +130,110 @@
   }
 
 
-    function createVideoElement(item) {
-      // Get the video ID, title, thumbnail URL, view count, like count and comment count from the item object
-      const videoId = item.id;
-      const title = item.snippet.title;
-      const thumbnailUrl = item.snippet.thumbnails.medium.url;
-      const viewCount = item.statistics ? item.statistics.viewCount : "N/A";
-      const likeCount = item.statistics ? item.statistics.likeCount : "N/A";
-      const commentCount = item.statistics ? item.statistics.commentCount : "N/A";
+  function createVideoElement(item) {
+  // Get the video ID, title, thumbnail URL, view count, like count and comment count from the item object
+  const videoId = item.id;
+  const title = item.snippet.title;
+  const thumbnailUrl = item.snippet.thumbnails.medium.url;
+  const viewCount = item.statistics ? item.statistics.viewCount : "N/A";
+  const likeCount = item.statistics ? item.statistics.likeCount : "N/A";
+  const commentCount = item.statistics ? item.statistics.commentCount : "N/A";
 
-      // Create a div element for the video
-      const videoDiv = document.createElement("div");
-      videoDiv.className = "video";
+  // Create a div element for the video
+  const videoDiv = document.createElement("div");
+  videoDiv.className = "video";
 
-      // Create a div element for the thumbnail
-      const thumbnailDiv = document.createElement("div");
-      thumbnailDiv.className = "sby_video_thumbnail";
+  // Create an image element for the thumbnail
+  const thumbnailImg = document.createElement("img");
+  thumbnailImg.src = thumbnailUrl;
+  thumbnailImg.alt = title;
 
-      // Create an image element for the thumbnail
-      const thumbnailImg = document.createElement("img");
-      thumbnailImg.src = thumbnailUrl;
-      thumbnailImg.alt = title;
+  // Create a div element for the play button
+  const playBtnDiv = document.createElement("div");
+  playBtnDiv.className = "play-btn";
 
-      // Create a div element for the play button
-      const playBtnDiv = document.createElement("div");
-      playBtnDiv.className = "sby_play_btn";
+  // Create an i element for the play button icon
+  const playBtnIcon = document.createElement("i");
+  playBtnIcon.className = "fas fa-play";
 
-      // Create a span element for the play button background
-      const playBtnBgSpan = document.createElement("span");
-      playBtnBgSpan.className = "sby_play_btn_bg";
+  // Append the icon to the play button div
+  playBtnDiv.appendChild(playBtnIcon);
 
-      // Create an i element for the play button icon
-      const playBtnIcon = document.createElement("i");
-      playBtnIcon.className = "fab fa-youtube";
+  // Add a click event listener to the play button div that opens the lightbox when clicked
+  playBtnDiv.addEventListener("click", () => {
+    const lightbox = createLightbox(videoId);
+    lightbox.style.display = "block";
+  });
 
-      // Append the background span and the icon to the play button div
-      playBtnDiv.appendChild(playBtnBgSpan);
-      playBtnDiv.appendChild(playBtnIcon);
+  // Create a div element for the title
+  const titleDiv = document.createElement("div");
+  titleDiv.className = "title";
+  titleDiv.textContent = title;
 
+  // Create a div element for the stats
+  const statsDiv = document.createElement("div");
+  statsDiv.className = "stats";
 
-      // Append the image and the play button div to the thumbnail div
-      thumbnailDiv.appendChild(thumbnailImg);
-      thumbnailDiv.appendChild(playBtnDiv);
+  // Create a span element for the view count
+  const viewCountSpan = document.createElement("span");
+  viewCountSpan.textContent = `${viewCount} views`;
 
-      // Add a click event listener to the thumbnail div that opens the lightbox when clicked
-      thumbnailDiv.addEventListener("click", () => {
-        const lightbox = createLightbox(videoId);
-        lightbox.style.display = "block";
-      });
+  // Create a span element for the like count
+  const likeCountSpan = document.createElement("span");
+  likeCountSpan.textContent = `${likeCount} likes`;
 
-      // Create a div element for the title
-      const titleDiv = document.createElement("div");
-      titleDiv.className = "title";
-      titleDiv.textContent = title;
+  // Create a span element for the comment count
+  const commentCountSpan = document.createElement("span");
+  commentCountSpan.textContent = `${commentCount} comments`;
 
-      // Create a div element for the stats
-      const statsDiv = document.createElement("div");
-      statsDiv.className = "stats";
+  // Append the view count, like count and comment count spans to the stats div
+  statsDiv.appendChild(viewCountSpan);
+  statsDiv.appendChild(likeCountSpan);
+  statsDiv.appendChild(commentCountSpan);
 
-      // Create a span element for the view count
-      const viewCountSpan = document.createElement("span");
-      viewCountSpan.textContent = `${viewCount} views`;
+  // Create a div element for the hover effect
+  const hoverEffectDiv = document.createElement("div");
+  hoverEffectDiv.className = "hover-effect";
 
-      // Create a span element for the like count
-      const likeCountSpan = document.createElement("span");
-      likeCountSpan.textContent = `${likeCount} likes`;
+  // Create a p element for the title
+  const hoverTitleP = document.createElement("p");
+  hoverTitleP.textContent = title;
 
-      // Create a span element for the comment count
-      const commentCountSpan = document.createElement("span");
-      commentCountSpan.textContent = `${commentCount} comments`;
+  // Create a p element for the stats
+  const hoverStatsP = document.createElement("p");
 
-      // Append the view count, like count and comment count spans to the stats div
-      statsDiv.appendChild(viewCountSpan);
-      statsDiv.appendChild(likeCountSpan);
-      statsDiv.appendChild(commentCountSpan);
+  // Create a span element for the view count
+  const hoverViewCountSpan = document.createElement("span");
+  hoverViewCountSpan.textContent = `${viewCount} views`;
 
-      // Append the thumbnail div, title div and stats div to the video div
-      videoDiv.appendChild(thumbnailDiv);
-      videoDiv.appendChild(titleDiv);
-      videoDiv.appendChild(statsDiv);
+  // Create a span element for the like count
+  const hoverLikeCountSpan = document.createElement("span");
+  hoverLikeCountSpan.textContent = `${likeCount} likes`;
 
-      // Return the video div
-      return videoDiv;
-    }
+  // Create a span element for the comment count
+  const hoverCommentCountSpan = document.createElement("span");
+  hoverCommentCountSpan.textContent = `${commentCount} comments`;
+
+  // Append the view count, like count and comment count spans to the stats p element
+  hoverStatsP.appendChild(hoverViewCountSpan);
+  hoverStatsP.appendChild(hoverLikeCountSpan);
+  hoverStatsP.appendChild(hoverCommentCountSpan);
+
+  // Append the title and stats p elements to the hover effect div
+  hoverEffectDiv.appendChild(hoverTitleP);
+  hoverEffectDiv.appendChild(hoverStatsP);
+
+  // Append the thumbnail image, play button div, title div, stats div and hover effect div to the video div
+  videoDiv.appendChild(thumbnailImg);
+  videoDiv.appendChild(playBtnDiv);
+  videoDiv.appendChild(titleDiv);
+  videoDiv.appendChild(statsDiv);
+  videoDiv.appendChild(hoverEffectDiv);
+
+  // Return the video div
+  return videoDiv;
+}
+
 
 
     // A function that fetches the data from the YouTube API and displays the videos in the grid
