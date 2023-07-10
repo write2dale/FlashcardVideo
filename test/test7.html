@@ -258,28 +258,42 @@
       
 
     // A function that fetches the data from the YouTube API and displays the videos in the grid
-    function displayVideos() {
-      // Fetch the data from the URL
-      fetch(URL)
-        .then(response => response.json())
-        .then(data => {
-          // Get the items array from the data object
-          const items = data.items;
+    async function displayVideos() {
+      try {
+        // Fetch the playlist items from the URL
+        const response = await fetch(URL);
+        const data = await response.json();
 
-          // Loop through each item in the array
-          for (let item of items) {
-            // Create a video element from the item object
-            const videoElement = createVideoElement(item);
+        // Get the items array from the data object
+        const items = data.items;
 
-            // Append the video element to the grid
-            videoGrid.appendChild(videoElement);
-          }
-        })
-        .catch(error => {
-          // Handle any errors that may occur
-          console.error(error);
-        });
+        // Loop through each item in the array
+        for (let item of items) {
+          // Get the video ID from the item object
+          const videoId = item.contentDetails.videoId;
+
+          // The URL to fetch the video statistics from the YouTube API
+          const videoUrl = `https://www.googleapis.com/youtube/v3/videos?part=snippet%2CcontentDetails%2Cstatistics&id=${videoId}&key=${API_KEY}`;
+
+          // Fetch the video statistics from the video URL
+          const videoResponse = await fetch(videoUrl);
+          const videoData = await videoResponse.json();
+
+          // Get the first item from the video data object
+          const videoItem = videoData.items[0];
+
+          // Create a video element from the item object
+          const videoElement = createVideoElement(videoItem);
+
+          // Append the video element to the grid
+          videoGrid.appendChild(videoElement);
+        }
+      } catch (error) {
+        // Handle any errors that may occur
+        console.error(error);
+      }
     }
+
 
     // Call the displayVideos function when the window loads
     window.onload = displayVideos;
