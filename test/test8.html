@@ -1,9 +1,84 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta name="viewport" content="width=device-width, initial-scale=1"> 
-  <!-- <link rel="stylesheet" type="text/css" href="styles.css"> -->
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <link rel="stylesheet" type="text/css" href="styles.css">
   <title> Videos</title>
+  <style>
+    /* Add some styles for the video grid and elements */
+
+
+    .sby_lightbox button {
+      position: absolute;
+      top: 10px;
+      right: 10px;
+      width: 30px;
+      height: 30px;
+      border: none;
+      background-color: transparent;
+      color: white;
+      font-size: 20px;
+      font-weight: bold;
+      cursor: pointer;
+    }
+
+    .sby_lightbox button:hover {
+      color: #ddd;
+    }
+
+    .sby_play_btn {
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+    }
+    .sby_video_thumbnail {
+      position: relative;
+    }
+    .sby_lightbox {
+      display: none;
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background-color: rgba(0,0,0,0.8);
+      z-index: 9999;
+    }
+
+    .sby_lightbox iframe {
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      width: 80%;
+      height: 80%;
+    }
+    #video-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+      grid-gap: 10px;
+    }
+
+    .video {
+      padding: 10px;
+      border: 1px solid black;
+    }
+
+    .video img {
+      width: 100%;
+    }
+
+    .video a {
+      display: block;
+      font-weight: bold;
+    }
+
+    .video span {
+      display: inline-block;
+      margin-right: 10px;
+    }
+  </style>
 </head>
 <body>
   <h1>YouTube Video</h1>
