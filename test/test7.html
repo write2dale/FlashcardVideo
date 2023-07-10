@@ -42,8 +42,10 @@
     // Replace this with the playlist ID you want to use
     const PLAYLIST_ID = "PL91oEcVvcstCNJDoYm2zWZavhfWX483y-";
 
+    const MAX_RESULTS = "50"
+
     // The URL to fetch the playlist items from the YouTube API
-    const URL = `https://www.googleapis.com/youtube/v3/playlistItems?part=snippet%2CcontentDetails%2Cstatus&playlistId=${PLAYLIST_ID}&key=${API_KEY}`;
+    const URL = `https://www.googleapis.com/youtube/v3/playlistItems?part=snippet%2CcontentDetails%2Cstatus&maxResults=${MAX_RESULTS}&playlistId=${PLAYLIST_ID}&key=${API_KEY}`;
 
     // The element where the videos will be displayed
     const videoGrid = document.getElementById("video-grid");
