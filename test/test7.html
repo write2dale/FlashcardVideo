@@ -104,9 +104,10 @@
       const videoId = item.id;
       const title = item.snippet.title;
       const thumbnailUrl = item.snippet.thumbnails.medium.url;
-      const viewCount = item.statistics.viewCount;
-      const likeCount = item.statistics.likeCount;
-      const commentCount = item.statistics.commentCount;
+      const viewCount = item.statistics ? item.statistics.viewCount : "N/A";
+      const likeCount = item.statistics ? item.statistics.likeCount : "N/A";
+      const commentCount = item.statistics ? item.statistics.commentCount : "N/A";
+
 
       // Create a div element for the video
       const videoDiv = document.createElement("div");
