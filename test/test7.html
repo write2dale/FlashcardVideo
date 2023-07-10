@@ -4,6 +4,37 @@
   <title>YouTube Video Data</title>
   <style>
     /* Add some styles for the video grid and elements */
+    .sby_play_btn {
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+    }
+    .sby_video_thumbnail {
+      position: relative;
+    }
+
+    .sby_lightbox {
+      display: none;
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background-color: rgba(0,0,0,0.8);
+      z-index: 9999;
+    }
+
+    .sby_lightbox iframe {
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      width: 80%;
+      height: 80%;
+    }
+
+
     #video-grid {
       display: grid;
       grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
@@ -42,7 +73,7 @@
     // Replace this with the playlist ID you want to use
     const PLAYLIST_ID = "PL91oEcVvcstCNJDoYm2zWZavhfWX483y-";
 
-    const MAX_RESULTS = "50"
+    const MAX_RESULTS = "7"
 
     // The URL to fetch the playlist items from the YouTube API
     const URL = `https://www.googleapis.com/youtube/v3/playlistItems?part=snippet%2CcontentDetails%2Cstatus&maxResults=${MAX_RESULTS}&playlistId=${PLAYLIST_ID}&key=${API_KEY}`;
@@ -97,6 +128,121 @@
       // Return the video div
       return videoDiv;
     }
+
+    function createLightbox(videoId) {
+      // Create a div element for the lightbox
+      const lightboxDiv = document.createElement("div");
+      lightboxDiv.className = "sby_lightbox";
+
+      // Create an iframe element for the video
+      const videoIframe = document.createElement("iframe");
+      videoIframe.src = `https://www.youtube.com/embed/${videoId}?autoplay=1`;
+      videoIframe.allow = "autoplay; encrypted-media";
+      // Append the iframe to the lightbox div
+      lightboxDiv.appendChild(videoIframe);
+
+      // Add an event listener to the lightbox div to close it when clicked
+      lightboxDiv.addEventListener("click", () => {
+        lightboxDiv.style.display = "none";
+      });
+
+      // Append the lightbox div to the document body
+      document.body.appendChild(lightboxDiv);
+
+      // Return the lightbox div
+      return lightboxDiv;
+    }
+
+    function createVideoElement(item) {
+      // Get the video ID, title, thumbnail URL, view count, like count and comment count from the item object
+      const videoId = item.contentDetails.videoId;
+      const title = item.snippet.title;
+      const thumbnailUrl = item.snippet.thumbnails.medium.url;
+      const viewCount = item.status.viewCount;
+      const likeCount = item.status.likeCount;
+      const commentCount = item.status.commentCount;
+
+      // Create a div element for the video
+      const videoDiv = document.createElement("div");
+      videoDiv.className = "video";
+
+      // Create a div element for the thumbnail
+      const thumbnailDiv = document.createElement("div");
+      thumbnailDiv.className = "sby_video_thumbnail";
+
+      // Create an image element for the thumbnail
+      const thumbnailImg = document.createElement("img");
+      thumbnailImg.src = thumbnailUrl;
+      thumbnailImg.alt = title;
+
+      // Create a div element for the play button
+      const playBtnDiv = document.createElement("div");
+      playBtnDiv.className = "sby_play_btn";
+
+      // Create a span element for the play button background
+      const playBtnBgSpan = document.createElement("span");
+      playBtnBgSpan.className = "sby_play_btn_bg";
+
+      // Create an i element for the play button icon
+      const playBtnIcon = document.createElement("i");
+      playBtnIcon.className = "fab fa-youtube";
+
+      // Append the background span and the SVG to the play button div
+      playBtnDiv.appendChild(playBtnBgSpan);
+      playBtnDiv.appendChild(playBtnSvg);
+
+      // Append the image and the play button div to the thumbnail div
+      thumbnailDiv.appendChild(thumbnailImg);
+      thumbnailDiv.appendChild(playBtnDiv);
+
+      // Add a click event listener to the thumbnail div that opens the lightbox when clicked
+      thumbnailDiv.addEventListener("click", () => {
+        const lightbox = createLightbox(videoId);
+        lightbox.style.display = "block";
+      });
+
+      // Create a div element for the title
+      const titleDiv = document.createElement("div");
+      titleDiv.className = "title";
+      titleDiv.textContent = title;
+
+      // Create a div element for the stats
+      const statsDiv = document.createElement("div");
+      statsDiv.className = "stats";
+
+      // Create a span element for the view count
+      const viewCountSpan = document.createElement("span");
+      viewCountSpan.textContent = `${viewCount} views`;
+
+      // Create a span element for the like count
+      const likeCountSpan = document.createElement("span");
+      likeCountSpan.textContent = `${likeCount} likes`;
+
+      // Create a span element for the comment count
+      const commentCountSpan = document.createElement("span");
+      commentCountSpan.textContent = `${commentCount} comments`;
+
+      // Append the view count, like count and comment count spans to the stats div
+      statsDiv.appendChild(viewCountSpan);
+      statsDiv.appendChild(likeCountSpan);
+      statsDiv.appendChild(commentCountSpan);
+
+      // Append the thumbnail div, title div and stats div to the video div
+      videoDiv.appendChild(thumbnailDiv);
+      videoDiv.appendChild(titleDiv);
+      videoDiv.appendChild(statsDiv);
+
+      // Return the video div
+      return videoDiv;
+    }
+
+
+
+
+
+      
+
+      
 
     // A function that fetches the data from the YouTube API and displays the videos in the grid
     function displayVideos() {
