@@ -197,10 +197,11 @@
       statsDiv.appendChild(likeCountSpan);
       statsDiv.appendChild(commentCountSpan);
 
-      // Append the thumbnail div, title div and stats div to the video div
+      // Append the thumbnail overlay(contentWrapper) div to the thumbnail div
       const contentWrapper = createContentWrapper();
-      videoDiv.appendChild(contentWrapper);
+      thumbnailDiv.appendChild(contentWrapper);
 
+      // Append the thumbnail div, title div and stats div to the video div
       videoDiv.appendChild(thumbnailDiv);
       videoDiv.appendChild(titleDiv);
       videoDiv.appendChild(statsDiv);
