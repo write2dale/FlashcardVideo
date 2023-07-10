@@ -99,56 +99,6 @@
     // The element where the videos will be displayed
     const videoGrid = document.getElementById("video-grid");
 
-    // A function that creates a video element from a video item object
-    function createVideoElement(item) {
-      // Get the video ID, title, thumbnail URL, view count, like count and comment count from the item object
-      const videoId = item.id;
-      const title = item.snippet.title;
-      const thumbnailUrl = item.snippet.thumbnails.medium.url;
-      const viewCount = item.statistics ? item.statistics.viewCount : "N/A";
-      const likeCount = item.statistics ? item.statistics.likeCount : "N/A";
-      const commentCount = item.statistics ? item.statistics.commentCount : "N/A";
-
-
-      // Create a div element for the video
-      const videoDiv = document.createElement("div");
-      videoDiv.className = "video";
-
-      // Create an image element for the thumbnail
-      const thumbnailImg = document.createElement("img");
-      thumbnailImg.src = thumbnailUrl;
-      thumbnailImg.alt = title;
-
-      // Create a link element for the title
-      const titleLink = document.createElement("a");
-      titleLink.href = `https://www.youtube.com/watch?v=${videoId}`;
-      titleLink.target = "_blank";
-      titleLink.textContent = title;
-
-      // Create a span element for the view count
-      const viewSpan = document.createElement("span");
-      viewSpan.textContent = `${viewCount} views`;
-
-      // Create a span element for the like count
-      const likeSpan = document.createElement("span");
-      likeSpan.textContent = `${likeCount} likes`;
-
-      // Create a span element for the comment count
-      const commentSpan = document.createElement("span");
-      commentSpan.textContent = `${commentCount} comments`;
-
-      // Append the elements to the video div
-      videoDiv.appendChild(thumbnailImg);
-      videoDiv.appendChild(titleLink);
-      videoDiv.appendChild(viewSpan);
-      videoDiv.appendChild(likeSpan);
-      videoDiv.appendChild(commentCount);
-
-      // Return the video div
-      return videoDiv;
-      }
-
-
     function createLightbox(videoId) {
     // Create a div element for the lightbox
     const lightboxDiv = document.createElement("div");
