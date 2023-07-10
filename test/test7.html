@@ -85,16 +85,15 @@
     // The element where the videos will be displayed
     const videoGrid = document.getElementById("video-grid");
 
-    // A function that creates a video element from a playlist item object
+    // A function that creates a video element from a video item object
     function createVideoElement(item) {
       // Get the video ID, title, thumbnail URL, view count, like count and comment count from the item object
-      const videoId = item.contentDetails.videoId;
+      const videoId = item.id;
       const title = item.snippet.title;
       const thumbnailUrl = item.snippet.thumbnails.medium.url;
       const viewCount = item.statistics.viewCount;
       const likeCount = item.statistics.likeCount;
       const commentCount = item.statistics.commentCount;
-
 
       // Create a div element for the video
       const videoDiv = document.createElement("div");
@@ -128,11 +127,12 @@
       videoDiv.appendChild(titleLink);
       videoDiv.appendChild(viewSpan);
       videoDiv.appendChild(likeSpan);
-      videoDiv.appendChild(commentSpan);
+      videoDiv.appendChild(commentCount);
 
       // Return the video div
       return videoDiv;
-    }
+      }
+
 
     function createLightbox(videoId) {
     // Create a div element for the lightbox
