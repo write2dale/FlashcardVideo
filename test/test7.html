@@ -4,6 +4,13 @@
   <title>YouTube Video Data</title>
   <style>
     /* Add some styles for the video grid and elements */
+
+
+    .sby_lightbox button {
+      position: absolute;
+      top: 10px;
+      right: 10px;
+    }
     .sby_play_btn {
       position: absolute;
       top: 50%;
@@ -13,7 +20,6 @@
     .sby_video_thumbnail {
       position: relative;
     }
-
     .sby_lightbox {
       display: none;
       position: fixed;
@@ -33,8 +39,6 @@
       width: 80%;
       height: 80%;
     }
-
-
     #video-grid {
       display: grid;
       grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
@@ -76,7 +80,7 @@
     const MAX_RESULTS = "7"
 
     // The URL to fetch the playlist items from the YouTube API
-    const URL = `https://www.googleapis.com/youtube/v3/playlistItems?part=snippet%2CcontentDetails%2Cstatus&maxResults=${MAX_RESULTS}&playlistId=${PLAYLIST_ID}&key=${API_KEY}`;
+    const URL = `https://www.googleapis.com/youtube/v3/playlistItems?part=snippet%2CcontentDetails%2Cstatistics&maxResults=${MAX_RESULTS}&playlistId=${PLAYLIST_ID}&key=${API_KEY}`;
 
     // The element where the videos will be displayed
     const videoGrid = document.getElementById("video-grid");
@@ -87,9 +91,10 @@
       const videoId = item.contentDetails.videoId;
       const title = item.snippet.title;
       const thumbnailUrl = item.snippet.thumbnails.medium.url;
-      const viewCount = item.status.viewCount;
-      const likeCount = item.status.likeCount;
-      const commentCount = item.status.commentCount;
+      const viewCount = item.statistics.viewCount;
+      const likeCount = item.statistics.likeCount;
+      const commentCount = item.statistics.commentCount;
+
 
       // Create a div element for the video
       const videoDiv = document.createElement("div");
@@ -130,28 +135,35 @@
     }
 
     function createLightbox(videoId) {
-      // Create a div element for the lightbox
-      const lightboxDiv = document.createElement("div");
-      lightboxDiv.className = "sby_lightbox";
+    // Create a div element for the lightbox
+    const lightboxDiv = document.createElement("div");
+    lightboxDiv.className = "sby_lightbox";
 
-      // Create an iframe element for the video
-      const videoIframe = document.createElement("iframe");
-      videoIframe.src = `https://www.youtube.com/embed/${videoId}?autoplay=1`;
-      videoIframe.allow = "autoplay; encrypted-media";
-      // Append the iframe to the lightbox div
-      lightboxDiv.appendChild(videoIframe);
+    // Create a button element for the close button
+    const closeBtn = document.createElement("button");
+    closeBtn.textContent = "Close";
 
-      // Add an event listener to the lightbox div to close it when clicked
-      lightboxDiv.addEventListener("click", () => {
-        lightboxDiv.style.display = "none";
-      });
+    // Add an event listener to the close button to close the lightbox when clicked
+    closeBtn.addEventListener("click", () => {
+      lightboxDiv.style.display = "none";
+    });
 
-      // Append the lightbox div to the document body
-      document.body.appendChild(lightboxDiv);
+    // Create an iframe element for the video
+    const videoIframe = document.createElement("iframe");
+    videoIframe.src = `https://www.youtube.com/embed/${videoId}?autoplay=1`;
+    videoIframe.allow = "autoplay; encrypted-media";
 
-      // Return the lightbox div
-      return lightboxDiv;
-    }
+    // Append the close button and the iframe to the lightbox div
+    lightboxDiv.appendChild(closeBtn);
+    lightboxDiv.appendChild(videoIframe);
+
+    // Append the lightbox div to the document body
+    document.body.appendChild(lightboxDiv);
+
+    // Return the lightbox div
+    return lightboxDiv;
+  }
+
 
     function createVideoElement(item) {
       // Get the video ID, title, thumbnail URL, view count, like count and comment count from the item object
