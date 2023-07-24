@@ -1,0 +1,210 @@
+<!DOCTYPE html>
+<html>
+<script src="https://mozilla.github.io/pdf.js/build/pdf.js"></script>
+
+<head>
+    <title>Canvas Drawing App</title>
+    <style>
+        #canvas {
+            position: absolute;
+            top: 0;
+            left: 0;
+            z-index: 1;
+        }
+
+        #pdf {
+            position: absolute;
+            top: 0;
+            left: 0;
+            z-index: 0;
+            width: 80%;
+            height: 80%;
+        }
+
+
+        .tools {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            z-index: 2;
+        }
+
+        .color-field {
+            display: inline-block;
+            width: 20px;
+            height: 20px;
+            margin-right: 5px;
+            border-radius: 50%;
+            cursor: pointer;
+        }
+    </style>
+</head>
+
+<body>
+    <canvas id="canvas"></canvas>
+    <canvas id="pdf-canvas"></canvas>
+
+
+    <div class="tools">
+        <button id="undo">Undo</button>
+        <button id="clear">Clear</button><br />
+        Pen color:
+        <input type="color" id="color-picker" /><br />
+        Pen width:
+        <input type="range" id="pen-width" min="1" max="10" value="1" /><br />
+        Colors:
+        <div class="color-field" style="background-color: black;"></div>
+        <div class="color-field" style="background-color: red;"></div>
+        <div class="color-field" style="background-color: orange;"></div>
+        <div class="color-field" style="background-color: yellow;"></div>
+        <div class="color-field" style="background-color: green;"></div>
+        <div class="color-field" style="background-color: blue;"></div>
+        <div class="color-field" style="background-color: purple;"></div>
+        <div class="color-field" style="background-color: pink;"></div><br />
+        PDF URL:
+        <input type="text" id="pdf-url" />
+        <button id="load-pdf">Load PDF</button>
+    </div>
+    <script>
+        const canvas = document.querySelector("#canvas");
+        const ctx = canvas.getContext("2d");
+        const undoButton = document.querySelector("#undo");
+        const clearButton = document.querySelector("#clear");
+        const colorPicker = document.querySelector("#color-picker");
+        const penWidth = document.querySelector("#pen-width");
+        const colorFields = document.querySelectorAll(".color-field");
+        const pdfUrl = document.querySelector("#pdf-url");
+        const loadPdfButton = document.querySelector("#load-pdf");
+        const pdfIframe = document.querySelector("#pdf");
+
+        let isDrawing = false;
+        let x = 0;
+        let y = 0;
+        let history = [];
+        let index = -1;
+
+        canvas.width = window.innerWidth - 60;
+        canvas.height = 900;
+        ctx.lineJoin = "round";
+        ctx.lineCap = "round";
+        ctx.lineWidth = penWidth.value;
+
+        function handleMouseDown(e) {
+            x = e.offsetX;
+            y = e.offsetY;
+            isDrawing = true;
+            index++;
+            history[index] = [];
+        }
+
+        function handleMouseMove(e) {
+            if (isDrawing === true) {
+                drawLine(ctx, x, y, e.offsetX, e.offsetY);
+                x = e.offsetX;
+                y = e.offsetY;
+                history[index].push({ x, y });
+            }
+        }
+
+        function handleMouseUp(e) {
+            if (isDrawing === true) {
+                drawLine(ctx, x, y, e.offsetX, e.offsetY);
+                x = 0;
+                y = 0;
+                isDrawing = false;
+            }
+        }
+
+        function drawLine(context, x1, y1, x2, y2) {
+            context.beginPath();
+            context.strokeStyle = colorPicker.value;
+            context.lineWidth = penWidth.value;
+            context.moveTo(x1, y1);
+            context.lineTo(x2, y2);
+            context.stroke();
+            context.closePath();
+        }
+
+        function handleUndo() {
+            if (index <= 0) {
+                clearCanvas();
+                return;
+            }
+            index--;
+            history.pop();
+            clearCanvas();
+            for (let i = index; i >= 0; i--) {
+                for (let j = history[i].length - 1; j >= 0; j--) {
+                    let point1 = history[i][j];
+                    let point2 =
+                        j === history[i].length - 1 ? point1 : history[i][j + 1];
+                    drawLine(ctx, point1.x, point1.y, point2.x, point2.y);
+                }
+            }
+        }
+
+        function clearCanvas() {
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+        }
+
+        function handleClear() {
+            clearCanvas();
+            history = [];
+            index = -1;
+        }
+
+        canvas.addEventListener("mousedown", handleMouseDown);
+        canvas.addEventListener("mousemove", handleMouseMove);
+        window.addEventListener("mouseup", handleMouseUp);
+
+        undoButton.addEventListener("click", handleUndo);
+        clearButton.addEventListener("click", handleClear);
+
+        colorFields.forEach((field) => {
+            field.addEventListener("click", (e) => {
+                const rgb = e.target.style.backgroundColor;
+                const hex = rgbToHex(rgb);
+                colorPicker.value = hex;
+                ctx.strokeStyle = hex; // update the strokeStyle property of the canvas context directly
+            });
+        });
+
+        function rgbToHex(rgb) {
+            const [r, g, b] = rgb.match(/\d+/g).map(Number);
+            return "#" + [r, g, b].map((n) => n.toString(16).padStart(2, "0")).join("");
+        }
+
+
+        // define a function to load and display a PDF file
+        function loadPdf(url) {
+            const pdfCanvas = document.querySelector('#pdf-canvas');
+            const ctx = pdfCanvas.getContext('2d');
+
+            pdfjsLib.getDocument(url).promise.then((pdf) => {
+                pdf.getPage(1).then((page) => {
+                    const viewport = page.getViewport({ scale: 1 });
+                    pdfCanvas.width = viewport.width;
+                    pdfCanvas.height = viewport.height;
+                    page.render({ canvasContext: ctx, viewport: viewport });
+                });
+            });
+        }
+
+        // set the default PDF URL
+        const defaultPdfUrl = 'https://www.k5learning.com/worksheets/kindergarten-identify-rectangles-worksheet.pdf';
+
+        // load and display the default PDF file
+        loadPdf(defaultPdfUrl);
+
+        // update the event listener for the load-pdf button to use the loadPdf function
+        loadPdfButton.addEventListener("click", () => {
+            const url = pdfUrl.value;
+            loadPdf(url);
+        });
+
+
+
+    </script>
+</body>
+
+</html>
