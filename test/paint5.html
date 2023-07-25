@@ -1,0 +1,135 @@
+<!DOCTYPE html>
+<html>
+<head>
+<style>
+.treeview {
+  height: 500px;
+  overflow-y: scroll;
+}
+
+ul {
+  list-style-type: none;
+}
+
+li.folder::before {
+  content: "▶";
+  color: black;
+  display: inline-block;
+  margin-right: 6px;
+}
+
+li.folder.expanded::before {
+  content: "▼";
+}
+
+li.folder > ul {
+  display: none;
+}
+
+li.folder.expanded > ul {
+  display: block;
+}
+</style>
+</head>
+<body>
+
+<h2>Search Box with Navigation Tree</h2>
+
+<input type="text" id="searchBox" placeholder="Search...">
+<button id="searchButton">Search</button>
+
+<div class="treeview"></div>
+
+<script>
+// Read the data from pdf_links.txt
+fetch('pdf_links.txt')
+  .then(response => response.text())
+  .then(data => {
+    // Parse the data
+    const links = data.split('\n').map(line => {
+      const [pdfLink, folderPath] = line.split(',');
+      const folders = folderPath.replace('https://', '').split('/');
+      return { pdfLink, folders };
+    });
+
+    // Generate the HTML for the navigation tree
+    const treeview = document.querySelector('.treeview');
+    const ul = document.createElement('ul');
+    links.forEach(link => {
+      let currentUl = ul;
+      link.folders.forEach((folderName, index) => {
+        let folder = currentUl.querySelector(`.folder[data-name="${folderName}"]`);
+        if (!folder) {
+          folder = document.createElement('li');
+          folder.classList.add('folder');
+          folder.setAttribute('data-name', folderName);
+          folder.textContent = folderName;
+          currentUl.appendChild(folder);
+        }
+        if (index === link.folders.length - 1) {
+          const li = document.createElement('li');
+          const a = document.createElement('a');
+          a.href = link.pdfLink;
+          a.textContent = link.pdfLink.split('/').pop();
+          li.appendChild(a);
+          if (!folder.querySelector('ul')) {
+            const subUl = document.createElement('ul');
+            folder.appendChild(subUl);
+          }
+          folder.querySelector('ul').appendChild(li);
+        } else {
+          if (!folder.querySelector('ul')) {
+            const subUl = document.createElement('ul');
+            folder.appendChild(subUl);
+          }
+          currentUl = folder.querySelector('ul');
+        }
+      });
+    });
+    treeview.appendChild(ul);
+
+    // Add event listeners to the folders
+    const folders = treeview.querySelectorAll('.folder');
+    folders.forEach(folder => {
+      folder.addEventListener('click', (event) => {
+        if (event.target === folder) {
+          folder.classList.toggle('expanded');
+          folder.focus();
+        }
+      });
+    });
+  });
+
+const searchBox = document.getElementById('searchBox');
+const searchButton = document.getElementById('searchButton');
+searchButton.addEventListener('click', () => {
+    // Expand all folders and subfolders
+    const folders = document.querySelectorAll('.folder');
+    folders.forEach(folder => {
+        folder.classList.add('expanded');
+    });
+
+    const searchTerm = searchBox.value.toLowerCase();
+    const links = document.querySelectorAll('.treeview a');
+    links.forEach(link => {
+        if (link.textContent.toLowerCase().includes(searchTerm)) {
+            link.parentElement.style.display = 'list-item';
+            let parent = link.parentElement;
+            while (parent && parent.classList.contains('folder')) {
+                parent.classList.add('expanded');
+                parent = parent.parentElement.parentElement;
+            }
+        } else {
+            link.parentElement.style.display = 'none';
+        }
+    });
+    folders.forEach(folder => {
+        if (!folder.querySelector(`a[href]:not([style*='display: none'])`)) {
+            folder.classList.remove('expanded');
+        }
+    });
+});
+</script>
+
+</body>
+</html> 
