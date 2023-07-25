@@ -15,24 +15,31 @@
         }
 
         #iframeContainer {
-            position: absolute;
-            top: 70px;
-            left: 0;
-
             width: 750px;
             height: 1500px;
             border: 0px;
             padding: 0;
+
+            position: fixed;
+            top: 0px;
+            left: 0px;
+            right: 0;
+            margin: 0 auto;
+            display: flex;
+            justify-content: center;
+            align-items: flex-start;
+
             overflow: hidden;
         }
         
         #pdf {
             position: absolute;
-            top: 70px;
+            top: 80px;
             left: 0;
             z-index: 0;
             width: 1000px;
             height: 2000px;
+
             border: 0px;
             zoom: 0.75;
             -moz-transform: scale(1.35);
