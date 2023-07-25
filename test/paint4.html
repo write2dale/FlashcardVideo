@@ -16,7 +16,7 @@
 
         #pdf {
             position: absolute;
-            top: 0px;
+            top: 70px;
             left: 0;
             z-index: 0;
             width: 100%;
@@ -25,18 +25,18 @@
         
         .toolsContainer {
             position: fixed;
-            bottom: 0;
-            left: 0;
+            top: 0px;
+            left: 0px;
             right: 0;
             margin: 0 auto;
             display: flex;
             justify-content: center;
-            align-items: flex-end;
+            align-items: flex-start;
         }
 
         .tools {
             position: absolute;
-            bottom: 10px;
+            top: 0px;
             z-index: 2;
             font-size: 20px;
 
@@ -44,8 +44,7 @@
 
         .tool-column {
             display: inline-block;
-            vertical-align: bottom;
-            margin-right: 20px;
+            margin-right: 40px;
         }
 
         .color-field {
@@ -124,10 +123,6 @@
 </head>
 
 <body>
-    <canvas id="canvas"></canvas>
-
-    <iframe id="pdf" name="pdfFrame"
-        src="https://docs.google.com/gview?embedded=true&url=https://www.k5learning.com/worksheets/cut-out-rulers.pdf#view=Fit&toolbar=0"></iframe>
     <div class="toolsContainer">
         <div class="tools">
 
@@ -193,7 +188,14 @@ https://static.thenounproject.com/png/75866-200.png eraser  dark-->
                 <div class="treeview"></div>
             </div>
         </div>
-    </div>
+ </div>
+        <canvas id="canvas"></canvas>
+
+        <iframe id="pdf" name="pdfFrame"
+            src="https://docs.google.com/gview?embedded=true&url=https://www.k5learning.com/worksheets/cut-out-rulers.pdf#view=Fit&toolbar=0"></iframe>
+       
+
+   
     <script>
         const canvas = document.querySelector("#canvas");
         const ctx = canvas.getContext("2d");
