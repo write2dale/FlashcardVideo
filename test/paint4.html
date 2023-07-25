@@ -14,13 +14,33 @@
             z-index: 1;
         }
 
+        #iframeContainer {
+            position: absolute;
+            top: 70px;
+            left: 0;
+
+            width: 750px;
+            height: 1500px;
+            border: 0px;
+            padding: 0;
+            overflow: hidden;
+        }
+        
         #pdf {
             position: absolute;
             top: 70px;
             left: 0;
             z-index: 0;
-            width: 100%;
-            height: calc(100vh + 60px);
+            width: 1000px;
+            height: 2000px;
+            border: 0px;
+            zoom: 0.75;
+            -moz-transform: scale(1.35);
+            -moz-transform-origin: 0 0;
+            -o-transform: scale(1.35);
+            -o-transform-origin: 0 0;
+            -webkit-transform: scale(1.35);
+            -webkit-transform-origin: 0 0;
         }
         
         .toolsContainer {
@@ -190,10 +210,10 @@ https://static.thenounproject.com/png/75866-200.png eraser  dark-->
         </div>
  </div>
         <canvas id="canvas"></canvas>
-
+<div class="iframeContainer">
         <iframe id="pdf" name="pdfFrame"
-            src="https://docs.google.com/gview?embedded=true&url=https://www.k5learning.com/worksheets/cut-out-rulers.pdf#view=Fit&toolbar=0"></iframe>
-       
+            src="https://docs.google.com/gview?embedded=true&url=https://www.k5learning.com/worksheets/cut-out-rulers.pdf"></iframe>
+</div>
 
    
     <script>
