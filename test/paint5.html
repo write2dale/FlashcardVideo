@@ -250,7 +250,7 @@
                         if (index === link.folders.length - 1) {
                             const li = document.createElement('li');
                             const a = document.createElement('a');
-                            a.href = link.pdfLink + "#view=Fit&toolbar=0";
+                            a.href = 'https://docs.google.com/gview?embedded=true&url=' + link.pdfLink + "#view=Fit&toolbar=0";
                             a.target = "pdfFrame";
                             a.textContent = link.pdfLink.split('/').pop();
                             li.appendChild(a);
