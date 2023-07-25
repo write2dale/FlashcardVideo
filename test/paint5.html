@@ -1,6 +1,5 @@
 <!DOCTYPE html>
 <html>
-
 <head>
     <title>Canvas Drawing App</title>
     <style>
@@ -17,7 +16,7 @@
 
         #pdf {
             position: absolute;
-            top: 0px;
+            top: 0px; 
             left: 0;
             z-index: 0;
             width: 100%;
@@ -40,40 +39,40 @@
             border-radius: 50%;
             cursor: pointer;
         }
-
+        
         .treeview {
-            height: 500px;
-            overflow-y: scroll;
+          height: 500px;
+          overflow-y: scroll;
         }
 
         ul {
-            list-style-type: none;
+          list-style-type: none;
         }
 
         li.folder::before {
-            content: "▶";
-            color: black;
-            display: inline-block;
-            margin-right: 6px;
+          content: "▶";
+          color: black;
+          display: inline-block;
+          margin-right: 6px;
         }
 
         li.folder.expanded::before {
-            content: "▼";
+          content: "▼";
         }
 
-        li.folder>ul {
-            display: none;
+        li.folder > ul {
+          display: none;
         }
 
-        li.folder.expanded>ul {
-            display: block;
+        li.folder.expanded > ul {
+          display: block;
         }
     </style>
 </head>
 
 <body>
     <canvas id="canvas"></canvas>
-    <iframe id="pdf"
+    <iframe id="pdf" name="pdfFrame"
         src="https://www.k5learning.com/worksheets/kindergarten-counting-number-recognition-10.pdf#view=Fit&toolbar=0"></iframe>
     <div class="tools">
         <button id="undo">Undo</button>
@@ -89,17 +88,17 @@
         <div class="color-field" style="background-color: #0000FF;"></div>
         <div class="color-field" style="background-color: #800080;"></div>
         <div class="color-field" style="background-color: #FFC0CB;"></div><input type="color" id="color-picker" /><br />
-
+        
         PDF URL:
         <input type="text" id="pdf-url" />
         <button id="load-pdf">Load PDF</button><br />
+        
+         Search Box with Navigation Tree:<br />
 
-        Search Box with Navigation Tree:<br />
+         <input type="text" id="searchBox" placeholder="Search...">
+         <button id="searchButton">Search</button>
 
-        <input type="text" id="searchBox" placeholder="Search...">
-        <button id="searchButton">Search</button>
-
-        <div class="treeview"></div>
+         <div class="treeview"></div>
 
     </div>
 
@@ -211,109 +210,104 @@
             const [r, g, b] = rgb.match(/\d+/g).map(Number);
             return "#" + [r, g, b].map((n) => n.toString(16).padStart(2, "0")).join("");
         }
-
+        
         loadPdfButton.addEventListener("click", () => {
             pdfIframe.src = pdfUrl.value + "#view=Fit&toolbar=0";
         });
+        
+         // Read the data from pdf_links.txt
+         fetch('pdf_links.txt')
+           .then(response => response.text())
+           .then(data => {
+             // Parse the data
+             const links = data.split('\n').map(line => {
+             if (line.includes(',')) {
+                 const [pdfLink, folderPath] = line.split(',');
+                 const folders = folderPath.replace('https://', '').split('/').map(folderName => folderName.replace('\n', '').replace('\r', ''));
+                 return { pdfLink, folders };
+             }
+             }).filter(link => link);
 
-        // Read the data from pdf_links.txt
-        fetch('pdf_links.txt')
-            .then(response => response.text())
-            .then(data => {
-                // Parse the data
-                const links = data.split('\n').map(line => {
-                    if (line.includes(',')) {
-                        const [pdfLink, folderPath] = line.split(',');
-                        const folders = folderPath.replace('https://', '').split('/').map(folderName => folderName.replace('\n', '').replace('\r', ''));
-                        return { pdfLink, folders };
-                    }
-                }).filter(link => link);
+             // Generate the HTML for the navigation tree
+             const treeview = document.querySelector('.treeview');
+             const ul = document.createElement('ul');
+             links.forEach(link => {
+               let currentUl = ul;
+               link.folders.forEach((folderName, index) => {
+                 let folder = currentUl.querySelector(`.folder[data-name="${folderName}"]`);
+                 if (!folder) {
+                   folder = document.createElement('li');
+                   folder.classList.add('folder');
+                   folder.setAttribute('data-name', folderName);
+                   folder.textContent = folderName;
+                   currentUl.appendChild(folder);
+                 }
+                 if (index === link.folders.length - 1) {
+                   const li = document.createElement('li');
+                   const a = document.createElement('a');
+                   a.href = link.pdfLink + "#view=Fit&toolbar=0";
+                   a.target = "pdfFrame";
+                   a.textContent = link.pdfLink.split('/').pop();
+                   li.appendChild(a);
+                   if (!folder.querySelector('ul')) {
+                     const subUl = document.createElement('ul');
+                     folder.appendChild(subUl);
+                   }
+                   folder.querySelector('ul').appendChild(li);
+                 } else {
+                   if (!folder.querySelector('ul')) {
+                     const subUl = document.createElement('ul');
+                     folder.appendChild(subUl);
+                   }
+                   currentUl = folder.querySelector('ul');
+                 }
+               });
+             });
+             treeview.appendChild(ul);
 
-                // Generate the HTML for the navigation tree
-                const treeview = document.querySelector('.treeview');
-                const ul = document.createElement('ul');
-                links.forEach(link => {
-                    let currentUl = ul;
-                    link.folders.forEach((folderName, index) => {
-                        let folder = currentUl.querySelector(`.folder[data-name="${folderName}"]`);
-                        if (!folder) {
-                            folder = document.createElement('li');
-                            folder.classList.add('folder');
-                            folder.setAttribute('data-name', folderName);
-                            folder.textContent = folderName;
-                            currentUl.appendChild(folder);
-                        }
-                        if (index === link.folders.length - 1) {
-                            const li = document.createElement('li');
-                            const a = document.createElement('a');
-                            a.href = link.pdfLink;
-                            a.textContent = link.pdfLink.split('/').pop();
-                            li.appendChild(a);
-                            if (!folder.querySelector('ul')) {
-                                const subUl = document.createElement('ul');
-                                folder.appendChild(subUl);
-                            }
-                            folder.querySelector('ul').appendChild(li);
+             // Add event listeners to the folders
+             const folders = treeview.querySelectorAll('.folder');
+             folders.forEach(folder => {
+               folder.addEventListener('click', (event) => {
+                 if (event.target === folder) {
+                   folder.classList.toggle('expanded');
+                   folder.focus();
+                 }
+               });
+             });
+           });
 
-                            // Add event listener to each link
-                            a.addEventListener('click', (event) => {
-                                event.preventDefault();
-                                pdfUrl.value = link.pdfLink;
-                                pdfIframe.src = link.pdfLink + "#view=Fit&toolbar=0";
-                            });
-                        } else {
-                            if (!folder.querySelector('ul')) {
-                                const subUl = document.createElement('ul');
-                                folder.appendChild(subUl);
-                            }
-                            currentUl = folder.querySelector('ul');
-                        }
-                    });
-                });
-                treeview.appendChild(ul);
+         const searchBox = document.getElementById('searchBox');
+         const searchButton = document.getElementById('searchButton');
+         searchButton.addEventListener('click', () => {
+             // Expand all folders and subfolders
+             const folders = document.querySelectorAll('.folder');
+             folders.forEach(folder => {
+                 folder.classList.add('expanded');
+             });
 
-                // Add event listeners to the folders
-                const folders = treeview.querySelectorAll('.folder');
-                folders.forEach(folder => {
-                    folder.addEventListener('click', (event) => {
-                        if (event.target === folder) {
-                            folder.classList.toggle('expanded');
-                            folder.focus();
-                        }
-                    });
-                });
-            });
-
-        const searchBox = document.getElementById('searchBox');
-        const searchButton = document.getElementById('searchButton');
-        searchButton.addEventListener('click', () => {
-            // Expand all folders and subfolders
-            const folders = document.querySelectorAll('.folder');
-            folders.forEach(folder => {
-                folder.classList.add('expanded');
-            });
-
-            const searchTerm = searchBox.value.toLowerCase();
-            const links = document.querySelectorAll('.treeview a');
-            links.forEach(link => {
-                if (link.textContent.toLowerCase().includes(searchTerm)) {
-                    link.parentElement.style.display = 'list-item';
-                    let parent = link.parentElement;
-                    while (parent && parent.classList.contains('folder')) {
-                        parent.classList.add('expanded');
-                        parent = parent.parentElement.parentElement;
-                    }
-                } else {
-                    link.parentElement.style.display = 'none';
-                }
-            });
-            folders.forEach(folder => {
-                if (!folder.querySelector(`a[href]:not([style*='display: none'])`)) {
-                    folder.classList.remove('expanded');
-                }
-            });
-        });
+             const searchTerm = searchBox.value.toLowerCase();
+             const links = document.querySelectorAll('.treeview a');
+             links.forEach(link => {
+                 if (link.textContent.toLowerCase().includes(searchTerm)) {
+                     link.parentElement.style.display = 'list-item';
+                     let parent = link.parentElement;
+                     while (parent && parent.classList.contains('folder')) {
+                         parent.classList.add('expanded');
+                         parent = parent.parentElement.parentElement;
+                     }
+                 } else {
+                     link.parentElement.style.display = 'none';
+                 }
+             });
+             folders.forEach(folder => {
+                 if (!folder.querySelector(`a[href]:not([style*='display: none'])`)) {
+                     folder.classList.remove('expanded');
+                 }
+             });
+         });
     </script>
 </body>
 
 </html>
+
