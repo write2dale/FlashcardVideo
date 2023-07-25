@@ -47,12 +47,13 @@ fetch('pdf_links.txt')
   .then(data => {
     // Parse the data
     const links = data.split('\n').map(line => {
-      if (line.includes(',')) {
+    if (line.includes(',')) {
         const [pdfLink, folderPath] = line.split(',');
-        const folders = folderPath.replace('https://', '').split('/');
+        const folders = folderPath.replace('https://', '').split('/').map(folderName => folderName.replace('\n', ''));
         return { pdfLink, folders };
-      }
+    }
     }).filter(link => link);
+
 
     // Generate the HTML for the navigation tree
     const treeview = document.querySelector('.treeview');
