@@ -1,0 +1,469 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Drawing App</title>
+    <style>
+        body {
+            overflow: hidden;
+        }
+
+        #canvas {
+            position: absolute;
+            top: 0;
+            left: 0;
+            z-index: 1;
+        }
+
+        #pdf {
+            position: absolute;
+            top: 0px;
+            left: 0;
+            z-index: 0;
+            width: 100%;
+            height: calc(100vh + 60px);
+        }
+        
+        .toolsContainer {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            margin: 0 auto;
+            display: flex;
+            justify-content: center;
+            align-items: flex-end;
+        }
+
+        .tools {
+            position: absolute;
+            bottom: 10px;
+            z-index: 2;
+            font-size: 20px;
+
+        }
+
+        .tool-column {
+            display: inline-block;
+            vertical-align: bottom;
+            margin-right: 20px;
+        }
+
+        .color-field {
+            display: inline-block;
+            width: 40px;
+            height: 40px;
+            margin-right: 5px;
+            border-radius: 50%;
+            cursor: pointer;
+            margin-right: 10px;
+        }
+
+        .toggle-icon {
+            display: inline-block;
+            margin-top: 10px;
+        }
+
+
+        .pen-size-slider {
+            display: inline-block;
+            /* transform: rotate(-90deg); */
+        }
+
+
+        #pen-size {
+            display: inline-block;
+            width: 200px;
+            height: 30px;
+        }
+
+        #color-picker {
+            display: none;
+        }
+
+        button {
+            display: inline-block;
+            padding: 10px 20px;
+            font-size: 20px;
+        }
+
+        .treeview {
+            height: 500px;
+            overflow-y: scroll;
+            background-color: rgba(255, 255, 255, 0.1);
+            /* Semi-transparent white background */
+            display: none;
+        }
+
+        ul {
+            list-style-type: none;
+        }
+
+        ul ul {
+            padding-left: 20px;
+        }
+
+        li.folder::before {
+            content: "▶";
+            color: black;
+            display: inline-block;
+            margin-right: 6px;
+        }
+
+        li.folder.expanded::before {
+            content: "▼";
+        }
+
+        li.folder>ul {
+            display: none;
+        }
+
+        li.folder.expanded>ul {
+            display: block;
+        }
+    </style>
+</head>
+
+<body>
+    <canvas id="canvas"></canvas>
+
+    <iframe id="pdf" name="pdfFrame"
+        src="https://docs.google.com/gview?embedded=true&url=https://www.k5learning.com/worksheets/cut-out-rulers.pdf#view=Fit&toolbar=0"></iframe>
+    <div class="toolsContainer">
+        <div class="tools">
+
+
+            <!--         <div class="pen-size-slider">
+            Pen size:
+            <input type="range" id="pen-size" min="4" max="20" value="6" />
+        </div><br /> -->
+
+            <div class="tool-column">
+                <!-- <button id="clear">Clear</button> -->
+                <img src="https://static.thenounproject.com/png/3513609-200.png" alt="Clear" onclick="clear()"
+                    width="40" height="40" />
+                <!-- <button id="undo">Undo</button> https://static.thenounproject.com/png/3513609-200.png -->
+                <img src="https://static.thenounproject.com/png/1777983-200.png" alt="Undo" onclick="undo()" width="40"
+                    height="40" />
+
+            </div>
+            <!--         https://static.thenounproject.com/png/3157291-200.png
+        https://static.thenounproject.com/png/2289902-200.png
+        https://static.thenounproject.com/png/3015732-200.png
+        2572372 stack of books
+        5897913 internet stack of books 
+         5256824 search book 
+        2929841 page search 
+    -2908155 pdf page 
+3823862 pdf down
+781693 pdf link
+1586924 eraser  white
+https://static.thenounproject.com/png/75866-200.png eraser  dark-->
+            <div class="tool-column">
+
+                <div class="color-field" style="background-color: #000000;"></div>
+                <div class="color-field" style="background-color: #FF0000;"></div>
+                <div class="color-field" style="background-color: #FFA500;"></div>
+                <div class="color-field" style="background-color: #008000;"></div>
+                <div class="color-field" style="background-color: #0000FF;"></div>
+                <div class="color-field" style="background-color: #800080;"></div>
+                <img src="https://static.thenounproject.com/png/75866-200.png" alt="eraser" onclick="eraser()"
+                    width="40" height="40" />
+
+                <div class="toggle-icon" onclick="togglePenSize()">
+                    <img src="https://static.thenounproject.com/png/3366100-200.png" alt="penSize" onclick="penSize()"
+                        width="45" height="45" />
+                </div>
+                <input type="color" id="color-picker" /><br />
+            </div>
+            <div class="tool-column">
+                <!-- <button id="showMenu">Menu</button> -->
+                <img src="https://static.thenounproject.com/png/5897913-200.png" alt="showMenu" onclick="showMenu()"
+                    width="40" height="40" />
+                <img src="https://static.thenounproject.com/png/2929841-200.png" alt="searchMenu" onclick="searchMenu()"
+                    width="40" height="40" />
+                <!--             <input type="text" id="searchBox" placeholder="Search Menu..." />
+            <button id="searchButton">Search</button><br />
+ -->
+                <img src="https://static.thenounproject.com/png/781693-200.png" alt="pdfUrl" onclick="pdfUrl()"
+                    width="40" height="40" />
+                <!--             <input type="text" id="pdf-url" placeholder="Pdf Url here" />
+            <button id="load-pdf">Load PDF</button> -->
+            </div>
+            <div class="tool-column">
+                <div class="treeview"></div>
+            </div>
+        </div>
+    </div>
+    <script>
+        const canvas = document.querySelector("#canvas");
+        const ctx = canvas.getContext("2d");
+        const undoButton = document.querySelector("#undo");
+        const clearButton = document.querySelector("#clear");
+        const colorPicker = document.querySelector("#color-picker");
+        const penWidth = document.querySelector("#pen-size");
+        const colorFields = document.querySelectorAll(".color-field");
+        const pdfUrl = document.querySelector("#pdf-url");
+        const loadPdfButton = document.querySelector("#load-pdf");
+        const pdfIframe = document.querySelector("#pdf");
+        // pdfIframe.setAttribute('width', '100%');
+        pdfIframe.width = `calc(100% - 100px)`;
+
+        let isDrawing = false;
+        let x = 0;
+        let y = 0;
+        let history = [];
+        let index = -1;
+
+        canvas.width = window.innerWidth;
+        canvas.height = window.innerHeight;
+        ctx.lineJoin = "round";
+        ctx.lineCap = "round";
+        ctx.lineWidth = penWidth.value;
+
+        function handleMouseDown(e) {
+            x = e.offsetX;
+            y = e.offsetY;
+            isDrawing = true;
+            index++;
+            history[index] = [];
+        }
+
+        function handleMouseMove(e) {
+            if (isDrawing === true) {
+                drawLine(ctx, x, y, e.offsetX, e.offsetY);
+                x = e.offsetX;
+                y = e.offsetY;
+                history[index].push({ x, y });
+            }
+        }
+
+        function handleMouseUp(e) {
+            if (isDrawing === true) {
+                drawLine(ctx, x, y, e.offsetX, e.offsetY);
+                x = 0;
+                y = 0;
+                isDrawing = false;
+            }
+        }
+
+        function handleTouchStart(e) {
+            e.preventDefault();
+            var touch = e.targetTouches[0];
+            x = touch.pageX - touch.target.offsetLeft;
+            y = touch.pageY - touch.target.offsetTop;
+            isDrawing = true;
+            index++;
+            history[index] = [];
+        }
+
+        function handleTouchMove(e) {
+            e.preventDefault();
+            var touch = e.targetTouches[0];
+            if (isDrawing === true) {
+                drawLine(ctx, x, y, touch.pageX - touch.target.offsetLeft, touch.pageY - touch.target.offsetTop);
+                x = touch.pageX - touch.target.offsetLeft;
+                y = touch.pageY - touch.target.offsetTop;
+                history[index].push({ x, y });
+            }
+        }
+
+        function handleTouchEnd(e) {
+            e.preventDefault();
+            if (isDrawing === true) {
+                drawLine(ctx, x, y, e.changedTouches[0].pageX - e.changedTouches[0].target.offsetLeft, e.changedTouches[0].pageY - e.changedTouches[0].target.offsetTop);
+                x = 0;
+                y = 0;
+                isDrawing = false;
+            }
+        }
+
+
+        function drawLine(context, x1, y1, x2, y2) {
+            context.beginPath();
+            context.strokeStyle = colorPicker.value;
+            context.lineWidth = penWidth.value;
+            context.moveTo(x1, y1);
+            context.lineTo(x2, y2);
+            context.stroke();
+            context.closePath();
+        }
+
+        function undo() {
+            if (index <= 0) {
+                clear();
+                return;
+            }
+            index--;
+            history.pop();
+            clear();
+            redraw();
+        }
+
+        function clear() {
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+        }
+
+        function redraw() {
+            for (let i = 0; i < history.length; i++) {
+                for (let j = 0; j < history[i].length - 1; j++) {
+                    drawLine(
+                        ctx,
+                        history[i][j].x,
+                        history[i][j].y,
+                        history[i][j + 1].x,
+                        history[i][j + 1].y
+                    );
+                }
+            }
+        }
+
+        canvas.addEventListener("mousedown", handleMouseDown);
+        canvas.addEventListener("mousemove", handleMouseMove);
+        window.addEventListener("mouseup", handleMouseUp);
+
+        canvas.addEventListener("touchstart", handleTouchStart);
+        canvas.addEventListener("touchmove", handleTouchMove);
+        canvas.addEventListener("touchend", handleTouchEnd);
+
+        undoButton.addEventListener("click", undo);
+        clearButton.addEventListener("click", clear);
+
+        colorFields.forEach((field) => {
+            field.addEventListener("click", (e) => {
+                const rgb = e.target.style.backgroundColor;
+                const hex = rgbToHex(rgb);
+                colorPicker.value = hex;
+            });
+        });
+
+        function rgbToHex(rgb) {
+            const [r, g, b] = rgb.match(/\d+/g).map(Number);
+            return "#" + [r, g, b].map((n) => n.toString(16).padStart(2, "0")).join("");
+        }
+
+        loadPdfButton.addEventListener("click", () => {
+            pdfIframe.src = pdfUrl.value + "#view=Fit&toolbar=0";
+        });
+
+        // Read the data from pdf_links.txt
+        fetch('pdf_links.txt')
+            .then(response => response.text())
+            .then(data => {
+                // Parse the data
+                const links = data.split('\n').map(line => {
+                    if (line.includes(',')) {
+                        const [pdfLink, folderPath] = line.split(',');
+                        const folders = folderPath.replace('https://', '').split('/').map(folderName => folderName.replace('\n', '').replace('\r', ''));
+                        return { pdfLink, folders };
+                    }
+                }).filter(link => link);
+
+                // Generate the HTML for the navigation tree
+                const treeview = document.querySelector('.treeview');
+                const ul = document.createElement('ul');
+                links.forEach(link => {
+                    let currentUl = ul;
+                    link.folders.forEach((folderName, index) => {
+                        let folder = currentUl.querySelector(`.folder[data-name="${folderName}"]`);
+                        if (!folder) {
+                            folder = document.createElement('li');
+                            folder.classList.add('folder');
+                            folder.setAttribute('data-name', folderName);
+                            folder.textContent = folderName;
+                            currentUl.appendChild(folder);
+                        }
+                        if (index === link.folders.length - 1) {
+                            const li = document.createElement('li');
+                            const a = document.createElement('a');
+                            a.href = 'https://docs.google.com/gview?embedded=true&url=' + link.pdfLink + "#view=Fit&toolbar=0";
+                            a.target = "pdfFrame";
+                            a.textContent = link.pdfLink.split('/').pop();
+                            li.appendChild(a);
+                            if (!folder.querySelector('ul')) {
+                                const subUl = document.createElement('ul');
+                                folder.appendChild(subUl);
+                            }
+                            folder.querySelector('ul').appendChild(li);
+                        } else {
+                            if (!folder.querySelector('ul')) {
+                                const subUl = document.createElement('ul');
+                                folder.appendChild(subUl);
+                            }
+                            currentUl = folder.querySelector('ul');
+                        }
+                    });
+                });
+                treeview.appendChild(ul);
+
+                // Add event listeners to the folders
+                const folders = treeview.querySelectorAll('.folder');
+                folders.forEach(folder => {
+                    folder.addEventListener('click', (event) => {
+                        if (event.target === folder) {
+                            folder.classList.toggle('expanded');
+                            folder.focus();
+                        }
+                    });
+                });
+            });
+
+        const searchBox = document.getElementById('searchBox');
+        const searchButton = document.getElementById('searchButton');
+        searchButton.addEventListener('click', () => {
+            // Expand all folders and subfolders
+            const folders = document.querySelectorAll('.folder');
+            folders.forEach(folder => {
+                folder.classList.add('expanded');
+            });
+
+            const searchTerm = searchBox.value.toLowerCase();
+            const links = document.querySelectorAll('.treeview a');
+            links.forEach(link => {
+                if (link.textContent.toLowerCase().includes(searchTerm)) {
+                    link.parentElement.style.display = 'list-item';
+                    let parent = link.parentElement;
+                    while (parent && parent.classList.contains('folder')) {
+                        parent.classList.add('expanded');
+                        parent = parent.parentElement.parentElement;
+                    }
+                } else {
+                    link.parentElement.style.display = 'none';
+                }
+            });
+            folders.forEach(folder => {
+                if (!folder.querySelector(`a[href]:not([style*='display: none'])`)) {
+                    folder.classList.remove('expanded');
+                }
+            });
+        });
+
+
+        function togglePenSize() {
+            var penSizeWrapper = document.getElementById("pen-size-slider");
+            if (penSizeWrapper.style.display === "none") {
+                penSizeWrapper.style.display = "block";
+            } else {
+                penSizeWrapper.style.display = "none";
+            }
+        }
+
+        // hide and show treeview from menu button
+        const showMenuButton = document.querySelector("#showMenu");
+        const treeview = document.querySelector(".treeview");
+
+        showMenuButton.addEventListener("click", () => {
+            const computedStyle = window.getComputedStyle(treeview);
+            if (computedStyle.display === "none") {
+                treeview.style.display = "block";
+            } else {
+                treeview.style.display = "none";
+            }
+        });
+
+
+
+
+    </script>
+</body>
+
+</html>
