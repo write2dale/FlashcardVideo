@@ -34,7 +34,7 @@
         
         #pdf {
             position: absolute;
-            top: 80px;
+            top: 120px;
             left: 0;
             z-index: 0;
             width: 1000px;
@@ -76,8 +76,8 @@
 
         .color-field {
             display: inline-block;
-            width: 40px;
-            height: 40px;
+            width: 55px;
+            height: 55px;
             margin-right: 5px;
             border-radius: 50%;
             cursor: pointer;
@@ -162,10 +162,10 @@
             <div class="tool-column">
                 <!-- <button id="clear">Clear</button> -->
                 <img src="https://static.thenounproject.com/png/3513609-200.png" alt="Clear" onclick="clear()"
-                    width="40" height="40" />
+                    width="55" height="55" />
                 <!-- <button id="undo">Undo</button> https://static.thenounproject.com/png/3513609-200.png -->
-                <img src="https://static.thenounproject.com/png/1777983-200.png" alt="Undo" onclick="undo()" width="40"
-                    height="40" />
+                <img src="https://static.thenounproject.com/png/1777983-200.png" alt="Undo" onclick="undo()" width="55"
+                    height="55" />
 
             </div>
             <!--         https://static.thenounproject.com/png/3157291-200.png
@@ -189,25 +189,25 @@ https://static.thenounproject.com/png/75866-200.png eraser  dark-->
                 <div class="color-field" style="background-color: #0000FF;"></div>
                 <div class="color-field" style="background-color: #800080;"></div>
                 <img src="https://static.thenounproject.com/png/75866-200.png" alt="eraser" onclick="eraser()"
-                    width="40" height="40" />
+                    width="65" height="65" style="position: relative; top: 6px;" />
 
                 <div class="toggle-icon" onclick="togglePenSize()">
                     <img src="https://static.thenounproject.com/png/3366100-200.png" alt="penSize" onclick="penSize()"
-                        width="45" height="45" />
+                        width="60" height="60" style="position: relative; top: 3px;" />
                 </div>
                 <input type="color" id="color-picker" /><br />
             </div>
             <div class="tool-column">
                 <!-- <button id="showMenu">Menu</button> -->
                 <img src="https://static.thenounproject.com/png/5897913-200.png" alt="showMenu" onclick="showMenu()"
-                    width="40" height="40" />
+                    width="55" height="55" />
                 <img src="https://static.thenounproject.com/png/2929841-200.png" alt="searchMenu" onclick="searchMenu()"
-                    width="40" height="40" />
+                    width="55" height="55" />
                 <!--             <input type="text" id="searchBox" placeholder="Search Menu..." />
             <button id="searchButton">Search</button><br />
  -->
                 <img src="https://static.thenounproject.com/png/781693-200.png" alt="pdfUrl" onclick="pdfUrl()"
-                    width="40" height="40" />
+                    width="55" height="55" />
                 <!--             <input type="text" id="pdf-url" placeholder="Pdf Url here" />
             <button id="load-pdf">Load PDF</button> -->
             </div>
