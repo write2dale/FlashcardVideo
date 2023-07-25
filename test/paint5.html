@@ -13,7 +13,6 @@
             top: 0;
             left: 0;
             z-index: 1;
-            height: calc(100vh + 60px);
         }
 
         #pdf {
@@ -22,8 +21,6 @@
             left: 0;
             z-index: 0;
             width: 100%;
-            display: block;
-            margin: 0 auto;
             height: calc(100vh + 60px);
         }
 
@@ -47,7 +44,7 @@
         .treeview {
             height: 500px;
             overflow-y: scroll;
-            background-color: rgba(255, 255, 255, 0.2); /* Semi-transparent white background */
+            background-color: rgba(255, 255, 255, 0.1); /* Semi-transparent white background */
         }
 
         ul {
@@ -82,7 +79,7 @@
 <body>
     <canvas id="canvas"></canvas>
     <iframe id="pdf" name="pdfFrame"
-        src="https://docs.google.com/gview?embedded=true&url=https://www.k5learning.com/worksheets/cut-out-rulers.pdf#view=Fit&toolbar=0"></iframe>
+    src="https://docs.google.com/gview?embedded=true&url=https://www.k5learning.com/worksheets/cut-out-rulers.pdf#view=Fit&toolbar=0"></iframe>
     <div class="tools">
         <button id="undo">Undo</button>
         <button id="clear">Clear</button><br />
@@ -132,7 +129,7 @@
         let index = -1;
 
         canvas.width = window.innerWidth;
-        canvas.height = window.innerHeight + 60;
+        canvas.height = window.innerHeight;
         ctx.lineJoin = "round";
         ctx.lineCap = "round";
         ctx.lineWidth = penWidth.value;
