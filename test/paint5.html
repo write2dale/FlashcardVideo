@@ -24,12 +24,17 @@
             height: calc(100vh + 60px);
         }
 
-
         .tools {
             position: absolute;
-            top: 10px;
-            right: 10px;
+            bottom: 10px;
+            left: 10px;
             z-index: 2;
+        }
+
+        .tool-column {
+            display: inline-block;
+            vertical-align: bottom;
+            margin-right: 20px;
         }
 
         .color-field {
@@ -41,10 +46,17 @@
             cursor: pointer;
         }
 
+        #pen-width {
+            width: 100px;
+        }
+
+
         .treeview {
             height: 500px;
             overflow-y: scroll;
-            background-color: rgba(255, 255, 255, 0.1); /* Semi-transparent white background */
+            background-color: rgba(255, 255, 255, 0.1);
+            /* Semi-transparent white background */
+            display: none;
         }
 
         ul {
@@ -79,33 +91,37 @@
 <body>
     <canvas id="canvas"></canvas>
     <iframe id="pdf" name="pdfFrame"
-    src="https://docs.google.com/gview?embedded=true&url=https://www.k5learning.com/worksheets/cut-out-rulers.pdf#view=Fit&toolbar=0"></iframe>
+        src="https://docs.google.com/gview?embedded=true&url=https://www.k5learning.com/worksheets/cut-out-rulers.pdf#view=Fit&toolbar=0"></iframe>
     <div class="tools">
-        <button id="undo">Undo</button>
-        <button id="clear">Clear</button><br />
-        Pen width:
-        <input type="range" id="pen-width" min="4" max="20" value="6" /><br />
-        Colors:
-        <div class="color-field" style="background-color: #000000;"></div>
-        <div class="color-field" style="background-color: #FF0000;"></div>
-        <div class="color-field" style="background-color: #FFA500;"></div>
-        <div class="color-field" style="background-color: #FFFF00;"></div>
-        <div class="color-field" style="background-color: #008000;"></div>
-        <div class="color-field" style="background-color: #0000FF;"></div>
-        <div class="color-field" style="background-color: #800080;"></div>
-        <div class="color-field" style="background-color: #FFC0CB;"></div><input type="color" id="color-picker" /><br />
+        <div class="tool-column">
+            <button id="undo">Undo</button><br />
+            <button id="clear">Clear</button><br />
+        </div>
+        <div class="tool-column">
+            Pen size:
+            <input type="range" id="pen-width" min="4" max="20" value="6" /><br />
+            Colors:
+            <div class="color-field" style="background-color: #000000;"></div>
+            <div class="color-field" style="background-color: #FF0000;"></div>
+            <div class="color-field" style="background-color: #FFA500;"></div>
+            <div class="color-field" style="background-color: #FFFF00;"></div>
+            <div class="color-field" style="background-color: #008000;"></div>
+            <div class="color-field" style="background-color: #0000FF;"></div>
+            <div class="color-field" style="background-color: #800080;"></div>
+            <div class="color-field" style="background-color: #FFC0CB;"></div><input type="color"
+                id="color-picker" /><br />
+        </div>
+        <div class="tool-column">
+            <button id="showMenu">Menu</button>
+            <input type="text" id="searchBox" placeholder="Search Menu..." />
+            <button id="searchButton">Search</button><br />
 
-        PDF URL:
-        <input type="text" id="pdf-url" />
-        <button id="load-pdf">Load PDF</button><br />
-
-        Search Box with Navigation Tree:<br />
-
-        <input type="text" id="searchBox" placeholder="Search...">
-        <button id="searchButton">Search</button>
-
-        <div class="treeview"></div>
-
+            <input type="text" id="pdf-url" placeholder="Pdf Url here" />
+            <button id="load-pdf">Load PDF</button>
+        </div>
+        <div class="tool-column">
+            <div class="treeview"></div>
+        </div>
     </div>
 
     <script>
@@ -350,6 +366,23 @@
                 }
             });
         });
+
+        // hide and show treeview from menu button
+        const showMenuButton = document.querySelector("#showMenu");
+        const treeview = document.querySelector(".treeview");
+
+        showMenuButton.addEventListener("click", () => {
+            const computedStyle = window.getComputedStyle(treeview);
+            if (computedStyle.display === "none") {
+                treeview.style.display = "block";
+            } else {
+                treeview.style.display = "none";
+            }
+        });
+
+
+
+
     </script>
 </body>
 
