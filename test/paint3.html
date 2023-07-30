@@ -537,6 +537,9 @@ user login if there is a drawing save it
                 const searchTerm = searchBox.value.toLowerCase();
                 const links = document.querySelectorAll('.treeview a');
                 links.forEach(link => {
+                    link.addEventListener('click', () => {
+                        clear();
+                    });
                     if (link.textContent.toLowerCase().includes(searchTerm)) {
                         link.parentElement.style.display = 'list-item';
                         let parent = link.parentElement;
