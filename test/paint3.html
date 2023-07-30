@@ -483,53 +483,62 @@ when a page loads, save the drawing and clear the canvas
             pdfIframe.src = 'https://docs.google.com/gview?embedded=true&url=' + pdfUrl.value + "#view=Fit&toolbar=0";
         });
 
-        // Read the data from data.json
-        fetch('data.json')
-        .then(response => response.json())
-        .then(data => {
-            // Generate the HTML for the navigation tree
-            const treeview = document.querySelector('.treeview');
-            const ul = document.createElement('ul');
-            generateTree(data, ul);
-            treeview.appendChild(ul);
+// Read the data from data.json
+fetch('data.json')
+  .then(response => {
+    if (!response.ok) {
+      throw new Error(`An error occurred while loading data.json: ${response.status} ${response.statusText}`);
+    }
+    return response.json();
+  })
+  .then(data => {
+    // Generate the HTML for the navigation tree
+    const treeview = document.querySelector('.treeview');
+    const ul = document.createElement('ul');
+    generateTree(data, ul);
+    treeview.appendChild(ul);
 
-            // Add event listeners to the folders
-            const folders = treeview.querySelectorAll('.folder');
-            folders.forEach(folder => {
-            folder.addEventListener('click', (event) => {
-                if (event.target === folder) {
-                folder.classList.toggle('expanded');
-                folder.focus();
-                }
-            });
-            });
-        });
-
-        function generateTree(topics, parentUl) {
-        topics.forEach(topic => {
-            const li = document.createElement('li');
-            li.classList.add('folder');
-            li.setAttribute('data-name', topic.name);
-            li.textContent = topic.name;
-            parentUl.appendChild(li);
-
-            if (topic.subtopics.length > 0) {
-            const subUl = document.createElement('ul');
-            li.appendChild(subUl);
-            generateTree(topic.subtopics, subUl);
-            } else if (topic.titleTexts) {
-            topic.titleTexts.forEach(titleText => {
-                const subLi = document.createElement('li');
-                const a = document.createElement('a');
-                a.href = 'https://docs.google.com/gview?embedded=true&url=' + titleText.pdfUrl + "#view=Fit&toolbar=0";
-                a.target = "pdfFrame";
-                a.textContent = titleText.text;
-                subLi.appendChild(a);
-                parentUl.appendChild(subLi);
-            });
-            }
-        });
+    // Add event listeners to the folders
+    const folders = treeview.querySelectorAll('.folder');
+    folders.forEach(folder => {
+      folder.addEventListener('click', (event) => {
+        if (event.target === folder) {
+          folder.classList.toggle('expanded');
+          folder.focus();
         }
+      });
+    });
+  })
+  .catch(error => {
+    console.error(error);
+  });
+
+function generateTree(topics, parentUl) {
+  topics.forEach(topic => {
+    const li = document.createElement('li');
+    li.classList.add('folder');
+    li.setAttribute('data-name', topic.name);
+    li.textContent = topic.name;
+    parentUl.appendChild(li);
+
+    if (topic.subtopics.length > 0) {
+      const subUl = document.createElement('ul');
+      li.appendChild(subUl);
+      generateTree(topic.subtopics, subUl);
+    } else if (topic.titleTexts) {
+      topic.titleTexts.forEach(titleText => {
+        const subLi = document.createElement('li');
+        const a = document.createElement('a');
+        a.href = 'https://docs.google.com/gview?embedded=true&url=' + titleText.pdfUrl + "#view=Fit&toolbar=0";
+        a.target = "pdfFrame";
+        a.textContent = titleText.text;
+        subLi.appendChild(a);
+        parentUl.appendChild(subLi);
+      });
+    }
+  });
+}
+
 
         const searchBox = document.getElementById('searchBox');
         const searchButton = document.getElementById('searchButton');
