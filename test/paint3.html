@@ -1,12 +1,16 @@
 <!DOCTYPE html>
 <!-- 
 user login if there is a drawing save it
-menu needs to ancor left
-when canvas is interacted with the hidden elelements need to hide. 
- 
+page selection
+lesson navigation
+
+no, it's ok.... when canvas is interacted with the hidden elelements need to hide. 
+? zoom blocked
+
 -->
 
 <html>
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
 
 <head>
     <title>Drawing App</title>
@@ -168,7 +172,7 @@ when canvas is interacted with the hidden elelements need to hide.
         }
 
         #searchMenuxx {
-            width: 300px;
+            width: 450px;
         }
 
         #pdf-url {
@@ -198,6 +202,15 @@ when canvas is interacted with the hidden elelements need to hide.
             font-size: 16sp;
             padding: 8dp;
             width: 700;
+        }
+
+        .close-button {
+            position: absolute;
+            top: 0;
+            right: 0;
+            font-size: 70px;
+            color: red;
+            cursor: pointer;
         }
 
         #hidden_elements {
@@ -301,6 +314,7 @@ when canvas is interacted with the hidden elelements need to hide.
     </div>
 
     <div id="hidden_elements">
+        <a class="close-button hidden">&times;</a>
         <input type="color" id="color-picker" /><br />
 
         <div class="pen-size-slider hidden">
@@ -613,26 +627,33 @@ when canvas is interacted with the hidden elelements need to hide.
             var penSizeWrapper1 = document.querySelector(".pen-size-slider");
             var loadPdfWrapper1 = document.querySelector(".load-pdf-section");
             var loadMenuWrapper1 = document.querySelector(".load-menu-section");
+            var closeButton1 = document.querySelector(".close-button");
+            closeButton1.addEventListener('click', toggleHiddenElements);
+            
 
             function togglePenSize() {
+                closeButton1.classList.toggle("hidden");
                 penSizeWrapper1.classList.toggle("hidden");
                 loadPdfWrapper1.classList.add("hidden");
                 loadMenuWrapper1.classList.add("hidden");
             }
 
             function toggleLoadPdf() {
+                closeButton1.classList.toggle("hidden");
                 loadPdfWrapper1.classList.toggle("hidden");
                 penSizeWrapper1.classList.add("hidden");
                 loadMenuWrapper1.classList.add("hidden");
             }
 
             function toggleLoadMenu() {
+                closeButton1.classList.toggle("hidden");
                 loadMenuWrapper1.classList.toggle("hidden");
                 penSizeWrapper1.classList.add("hidden");
                 loadPdfWrapper1.classList.add("hidden");
             }
 
             function toggleHiddenElements() {
+                closeButton1.classList.add("hidden");
                 loadMenuWrapper1.classList.add("hidden");
                 penSizeWrapper1.classList.add("hidden");
                 loadPdfWrapper1.classList.add("hidden");
