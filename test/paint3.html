@@ -1,8 +1,8 @@
 <!DOCTYPE html>
 <!-- 
-when a page loads, save the drawing and clear the canvas
+user login if there is a drawing save it
 
- 
+
 -->
 
 <html>
@@ -83,10 +83,10 @@ when a page loads, save the drawing and clear the canvas
             vertical-align: top;
         }
 
-        #clear{
+        #clear {
             margin-top: 15px;
         }
-        
+
         #undo {
             margin-top: 15px;
         }
@@ -106,7 +106,7 @@ when a page loads, save the drawing and clear the canvas
             display: inline-block;
             margin-top: 10px;
         }
-        
+
         .toggle-load-pdf {
             display: inline-block;
             margin-top: 15px;
@@ -125,7 +125,7 @@ when a page loads, save the drawing and clear the canvas
             transform: rotate(-90deg);  */
         }
 
-        .load-pdf-section{
+        .load-pdf-section {
             /* display: inline-block; */
             display: flex;
             flex-direction: column;
@@ -133,7 +133,7 @@ when a page loads, save the drawing and clear the canvas
             /* transform: rotate(-90deg);  */
         }
 
-        .load-menu-section{
+        .load-menu-section {
             /* display: inline-block; */
             display: flex;
             flex-direction: column;
@@ -162,7 +162,7 @@ when a page loads, save the drawing and clear the canvas
             overflow-y: scroll;
             background-color: rgba(255, 255, 255, 0.95);
             /* Semi-transparent white background */
-         /*    display: none; */
+            /*    display: none; */
         }
 
         #hidden_elements {
@@ -178,6 +178,9 @@ when a page loads, save the drawing and clear the canvas
             display: none;
         }
 
+        .button-image.selected {
+            border: 4px solid grey;
+        }
 
         ul {
             list-style-type: none;
@@ -211,18 +214,400 @@ when a page loads, save the drawing and clear the canvas
 <body>
     <div class="toolsContainer">
         <div class="tools">
-    
+
             <div class="tool-column">
                 <!-- <button id="clear">Clear</button> -->
-                <img src="https://static.thenounproject.com/png/3513609-200.png" id="clear" alt="Clear" width="55"
-                    height="55" />
+                <img class='button-image' src="https://static.thenounproject.com/png/3513609-200.png" id="clear"
+                    alt="Clear" width="55" height="55" />
                 <!-- <button id="undo">Undo</button> https://static.thenounproject.com/png/3513609-200.png -->
-                <img src="https://static.thenounproject.com/png/1777983-200.png" id="undo" alt="Undo" width="55"
-                    height="55" />
+                <img class='button-image' src="https://static.thenounproject.com/png/1777983-200.png" id="undo"
+                    alt="Undo" width="55" height="55" />
             </div>
-    
+
             <div class="tool-column">
-                <!--    
+                <div class="color-field button-image" style="background-color: #000000;"></div>
+                <div class="color-field button-image" style="background-color: #FF0000;"></div>
+                <div class="color-field button-image" style="background-color: #FFA500;"></div>
+                <div class="color-field button-image" style="background-color: #008000;"></div>
+                <div class="color-field button-image" style="background-color: #0000FF;"></div>
+                <div class="color-field button-image" style="background-color: #800080;"></div>
+
+                <img class="button-image" src="https://static.thenounproject.com/png/75866-200.png" id="eraser"
+                    alt="eraser" width="65" height="65" style="position: relative; top: 6px;" />
+
+                <div class="toggle-icon-pensize button-image" onclick="togglePenSize()">
+                    <img src="https://static.thenounproject.com/png/3366100-200.png" alt="penSize" width="60"
+                        height="60" style="position: relative; top: 3px;" />
+                </div>
+            </div>
+
+            <div class="tool-column">
+                <div class="toggle-load-pdf button-image" onclick="toggleLoadPdf()">
+                    <img src="https://static.thenounproject.com/png/781693-200.png" alt="hide-load-pdf" width="55"
+                        height="55" />
+                </div>
+
+                <div class="toggle-load-menu button-image" onclick="toggleLoadMenu()">
+                    <img src="https://static.thenounproject.com/png/2929841-200.png" alt="searchMenu"
+                        onclick="searchMenu()" width="55" height="55" />
+                </div>
+            </div>
+
+        </div>
+    </div>
+
+    <canvas id="canvas"></canvas>
+    <div class="iframeContainer">
+        <iframe id="pdf" name="pdfFrame"
+            src="https://docs.google.com/gview?embedded=true&url=https://www.k5learning.com/worksheets/cut-out-rulers.pdf"></iframe>
+    </div>
+
+    <div id="hidden_elements">
+        <input type="color" id="color-picker" /><br />
+
+        <div class="pen-size-slider hidden">
+            <input type="range" id="pen-size" min="4" max="20" value="6" />
+        </div>
+
+        <div class="load-pdf-section hidden ">
+            <input type="text" id="pdf-url" placeholder="Pdf Url here" />
+            <button id="load-pdf">Load PDF</button>
+        </div>
+
+        <div class="load-menu-section hidden">
+            <input type="text" id="searchMenuxx" placeholder="Search Menu..." />
+            <button id="searchButton">Search</button><br />
+            <div class="treeview"></div>
+        </div>
+    </div>
+
+        <script>
+            const canvas = document.querySelector("#canvas");
+            const ctx = canvas.getContext("2d");
+            const undoButton = document.querySelector("#undo");
+            const clearButton = document.querySelector("#clear");
+            const colorPicker = document.querySelector("#color-picker");
+            // Set the value property of the color-picker element to blue
+            colorPicker.value = "#0000FF";
+            const penWidth = document.querySelector("#pen-size");
+            const colorFields = document.querySelectorAll(".color-field");
+            const pdfUrl = document.querySelector("#pdf-url");
+            const loadPdfButton = document.querySelector("#load-pdf");
+            const pdfIframe = document.querySelector("#pdf");
+            // pdfIframe.setAttribute('width', '100%');
+            pdfIframe.width = `calc(100% - 100px)`;
+            let selectedColorField = null;
+            const eraser = document.querySelector("#eraser");
+            let eraserSelected = false;
+
+
+            let isDrawing = false;
+            let x = 0;
+            let y = 0;
+            let history = [];
+            let index = -1;
+
+            // canvas.width = window.innerWidth;
+            canvas.width = 1000;
+            canvas.height = window.innerHeight;
+            ctx.lineJoin = "round";
+            ctx.lineCap = "round";
+            ctx.lineWidth = penWidth.value;
+
+            function handleMouseDown(e) {
+                x = e.offsetX;
+                y = e.offsetY;
+                isDrawing = true;
+                index++;
+                history[index] = [];
+            }
+
+            function handleMouseMove(e) {
+                if (isDrawing === true) {
+                    drawLine(ctx, x, y, e.offsetX, e.offsetY);
+                    x = e.offsetX;
+                    y = e.offsetY;
+                    history[index].push({ x, y, color: ctx.strokeStyle, lineWidth: ctx.lineWidth });
+                }
+            }
+
+            function handleMouseUp(e) {
+                if (isDrawing === true) {
+                    drawLine(ctx, x, y, e.offsetX, e.offsetY);
+                    x = 0;
+                    y = 0;
+                    isDrawing = false;
+                }
+            }
+
+            function handleTouchStart(e) {
+                e.preventDefault();
+                var touch = e.targetTouches[0];
+                x = touch.pageX - touch.target.offsetLeft;
+                y = touch.pageY - touch.target.offsetTop;
+                isDrawing = true;
+                index++;
+                history[index] = [];
+            }
+
+            function handleTouchMove(e) {
+                e.preventDefault();
+                var touch = e.targetTouches[0];
+                if (isDrawing === true) {
+                    drawLine(ctx, x, y, touch.pageX - touch.target.offsetLeft, touch.pageY - touch.target.offsetTop);
+                    x = touch.pageX - touch.target.offsetLeft;
+                    y = touch.pageY - touch.target.offsetTop;
+                    history[index].push({ x, y, color: ctx.strokeStyle, lineWidth: ctx.lineWidth });
+                }
+            }
+
+            function handleTouchEnd(e) {
+                e.preventDefault();
+                if (isDrawing === true) {
+                    drawLine(ctx, x, y, e.changedTouches[0].pageX - e.changedTouches[0].target.offsetLeft, e.changedTouches[0].pageY - e.changedTouches[0].target.offsetTop);
+                    x = 0;
+                    y = 0;
+                    isDrawing = false;
+                }
+            }
+
+
+            function drawLine(context, x1, y1, x2, y2) {
+                context.beginPath();
+                context.strokeStyle = colorPicker.value;
+                context.lineWidth = penWidth.value;
+                context.moveTo(x1, y1);
+                context.lineTo(x2, y2);
+                context.stroke();
+                context.closePath();
+            }
+
+            function undo() {
+                if (index <= 0) {
+                    clear();
+                    toggleHiddenElements();
+                    return;
+                }
+                index--;
+                history.pop();
+                clear();
+                redraw();
+                toggleHiddenElements();
+            }
+
+            function clear() {
+                ctx.clearRect(0, 0, canvas.width, canvas.height);
+                toggleHiddenElements();
+            }
+
+            function redraw() {
+                for (let i = 0; i < history.length; i++) {
+                    for (let j = 0; j < history[i].length - 1; j++) {
+                        ctx.beginPath();
+                        ctx.strokeStyle = history[i][j].color;
+                        ctx.lineWidth = history[i][j].lineWidth;
+                        ctx.moveTo(history[i][j].x, history[i][j].y);
+                        ctx.lineTo(history[i][j + 1].x, history[i][j + 1].y);
+                        ctx.stroke();
+                        ctx.closePath();
+                    }
+                }
+            }
+
+            canvas.addEventListener("mousedown", handleMouseDown);
+            canvas.addEventListener("mousemove", handleMouseMove);
+            window.addEventListener("mouseup", handleMouseUp);
+
+            canvas.addEventListener("touchstart", handleTouchStart);
+            canvas.addEventListener("touchmove", handleTouchMove);
+            canvas.addEventListener("touchend", handleTouchEnd);
+
+            undoButton.addEventListener("click", undo);
+            clearButton.addEventListener("click", clear);
+
+            colorFields.forEach((field) => {
+                field.addEventListener("click", (e) => {
+                    // Reset the globalCompositeOperation property and update the strokeStyle property
+                    ctx.globalCompositeOperation = "source-over";
+                    ctx.strokeStyle = field.style.backgroundColor;
+                    toggleHiddenElements();
+
+                    // Convert the backgroundColor property to a hexadecimal color value and update the colorPicker value
+                    const rgb = e.target.style.backgroundColor;
+                    const hex = rgbToHex(rgb);
+                    colorPicker.value = hex;
+                });
+            });
+
+
+            function rgbToHex(rgb) {
+                // Use a regular expression to extract the red, green, blue, and alpha components from the input string
+                const [r, g, b, a] = rgb.match(/\d+(\.\d+)?/g).map(Number);
+
+                // Convert the red, green, and blue components to hexadecimal values
+                const [rHex, gHex, bHex] = [r, g, b].map((n) => n.toString(16).padStart(2, "0"));
+
+                // If the alpha component is present, convert it to a hexadecimal value
+                const aHex = a !== undefined ? (a * 255).toString(16).padStart(2, "0") : "";
+
+                // Return the concatenated hexadecimal color value
+                return "#" + rHex + gHex + bHex + aHex;
+            }
+
+
+
+            eraser.addEventListener("click", () => {
+                // Set the globalCompositeOperation property to "destination-out"
+                ctx.globalCompositeOperation = "destination-out";
+                toggleHiddenElements();
+            });
+
+
+            loadPdfButton.addEventListener("click", () => {
+                pdfIframe.src = 'https://docs.google.com/gview?embedded=true&url=' + pdfUrl.value + "#view=Fit&toolbar=0";
+                clear();
+            });
+
+            // Read the data from data.json
+            fetch('data.json')
+                .then(response => {
+                    if (!response.ok) {
+                        throw new Error(`An error occurred while loading data.json: ${response.status} ${response.statusText}`);
+                    }
+                    return response.json();
+                })
+                .then(data => {
+                    // Generate the HTML for the navigation tree
+                    const treeview = document.querySelector('.treeview');
+                    const ul = document.createElement('ul');
+                    generateTree(data, ul);
+                    treeview.appendChild(ul);
+
+                    // Add event listeners to the folders
+                    const folders = treeview.querySelectorAll('.folder');
+                    folders.forEach(folder => {
+                        folder.addEventListener('click', (event) => {
+                            if (event.target === folder) {
+                                folder.classList.toggle('expanded');
+                                folder.focus();
+                            }
+                        });
+                    });
+                })
+                .catch(error => {
+                    console.error(error);
+                });
+
+            function generateTree(topics, parentUl) {
+                topics.forEach(topic => {
+                    const li = document.createElement('li');
+                    li.classList.add('folder');
+                    li.setAttribute('data-name', topic.name);
+                    li.textContent = topic.name;
+                    parentUl.appendChild(li);
+
+                    if (topic.subtopics && topic.subtopics.length > 0) {
+                        const subUl = document.createElement('ul');
+                        li.appendChild(subUl);
+                        generateTree(topic.subtopics, subUl);
+                    } else if (topic.titleTexts) {
+                        topic.titleTexts.forEach(titleText => {
+                            const subLi = document.createElement('li');
+                            const a = document.createElement('a');
+                            a.href = 'https://docs.google.com/gview?embedded=true&url=' + titleText.pdfUrl + "#view=Fit&toolbar=0";
+                            a.target = "pdfFrame";
+                            a.textContent = titleText.text;
+                            subLi.appendChild(a);
+                            parentUl.appendChild(subLi);
+                        });
+                    }
+                });
+            }
+
+
+            const searchBox = document.getElementById('searchBox');
+            const searchButton = document.getElementById('searchButton');
+            searchButton.addEventListener('click', () => {
+                // Expand all folders and subfolders
+                const folders = document.querySelectorAll('.folder');
+                folders.forEach(folder => {
+                    folder.classList.add('expanded');
+                });
+
+                const searchTerm = searchBox.value.toLowerCase();
+                const links = document.querySelectorAll('.treeview a');
+                links.forEach(link => {
+                    if (link.textContent.toLowerCase().includes(searchTerm)) {
+                        link.parentElement.style.display = 'list-item';
+                        let parent = link.parentElement;
+                        while (parent && parent.classList.contains('folder')) {
+                            parent.classList.add('expanded');
+                            parent = parent.parentElement.parentElement;
+                        }
+                    } else {
+                        link.parentElement.style.display = 'none';
+                    }
+                });
+                folders.forEach(folder => {
+                    if (!folder.querySelector(`a[href]:not([style*='display: none'])`)) {
+                        folder.classList.remove('expanded');
+                    }
+                });
+            });
+
+            const buttons = document.querySelectorAll('.button-image');
+            buttons.forEach(button => {
+                button.addEventListener('click', () => {
+                    // Remove the 'selected' class from all buttons
+                    buttons.forEach(button => {
+                        button.classList.remove('selected');
+                    });
+                    // Add the 'selected' class to the clicked button
+                    button.classList.add('selected');
+                });
+            });
+
+            var penSizeWrapper1 = document.querySelector(".pen-size-slider");
+            var loadPdfWrapper1 = document.querySelector(".load-pdf-section");
+            var loadMenuWrapper1 = document.querySelector(".load-menu-section");
+
+            function togglePenSize() {
+                penSizeWrapper1.classList.toggle("hidden");
+                loadPdfWrapper1.classList.add("hidden");
+                loadMenuWrapper1.classList.add("hidden");
+            }
+
+            function toggleLoadPdf() {
+                loadPdfWrapper1.classList.toggle("hidden");
+                penSizeWrapper1.classList.add("hidden");
+                loadMenuWrapper1.classList.add("hidden");
+            }
+
+            function toggleLoadMenu() {
+                loadMenuWrapper1.classList.toggle("hidden");
+                penSizeWrapper1.classList.add("hidden");
+                loadPdfWrapper1.classList.add("hidden");
+            }
+
+            function toggleHiddenElements() {
+                loadMenuWrapper1.classList.add("hidden");
+                penSizeWrapper1.classList.add("hidden");
+                loadPdfWrapper1.classList.add("hidden");
+                setTimeout(() => {
+                    clearButton.classList.remove('selected');
+                    undoButton.classList.remove('selected');
+                }, 500);
+            }
+
+
+            // hide and show treeview from menu button
+            const showMenuButton = document.querySelector("#showMenu");
+            const treeview = document.querySelector(".treeview");
+
+
+        </script>
+
+        <!--    
                         https://static.thenounproject.com/png/3157291-200.png
                         https://static.thenounproject.com/png/2289902-200.png
                         https://static.thenounproject.com/png/3015732-200.png
@@ -236,405 +621,7 @@ when a page loads, save the drawing and clear the canvas
                         1586924 eraser  white
                         https://static.thenounproject.com/png/75866-200.png eraser  dark
                     -->
-                <div class="color-field" style="background-color: #000000;"></div>
-                <div class="color-field" style="background-color: #FF0000;"></div>
-                <div class="color-field" style="background-color: #FFA500;"></div>
-                <div class="color-field" style="background-color: #008000;"></div>
-                <div class="color-field" style="background-color: #0000FF;"></div>
-                <div class="color-field" style="background-color: #800080;"></div>
-                <img src="https://static.thenounproject.com/png/75866-200.png" id="eraser" alt="eraser" width="65"
-                    height="65" style="position: relative; top: 6px;" />
-    
-                <div class="toggle-icon-pensize" onclick="togglePenSize()">
-                    <img src="https://static.thenounproject.com/png/3366100-200.png" alt="penSize" width="60" height="60"
-                        style="position: relative; top: 3px;" />
-                </div>
-            </div>
 
-            <div class="tool-column">
-                <!-- <button id="showMenu">Menu</button> -->
-<!--                 <img src="https://static.thenounproject.com/png/5897913-200.png" alt="showM" onclick="showMenuxx()" width="55"
-                    height="55" /> -->
-            
-                <div class="toggle-load-pdf" onclick="toggleLoadPdf()">
-                    <img src="https://static.thenounproject.com/png/781693-200.png" alt="hide-load-pdf" width="55" height="55" />
-                </div>
-            
-            
-                <div class="toggle-load-menu" onclick="toggleLoadMenu()">
-                    <img src="https://static.thenounproject.com/png/2929841-200.png" alt="searchMenu" onclick="searchMenu()"
-                        width="55" height="55" />
-                </div>
-            </div>
-
-
-            </div>
-    
-        </div>
-    </div>
-    
-    <canvas id="canvas"></canvas>
-    <div class="iframeContainer">
-        <iframe id="pdf" name="pdfFrame"
-            src="https://docs.google.com/gview?embedded=true&url=https://www.k5learning.com/worksheets/cut-out-rulers.pdf"></iframe>
-    </div>
-
-            <div id="hidden_elements">
-                <input type="color" id="color-picker" /><br />
-    
-                <div class="pen-size-slider hidden">
-                    <input type="range" id="pen-size" min="4" max="20" value="6" />
-                </div>
-    
-                <div class="load-pdf-section hidden ">
-                    <input type="text" id="pdf-url" placeholder="Pdf Url here" />
-                    <button id="load-pdf">Load PDF</button>
-                </div>
-
-                <div class="load-menu-section hidden">
-                <input type="text" id="searchMenuxx"placeholder="Search Menu..." />
-                <button id="searchButton">Search</button><br />
-                <div class="treeview"></div>
-            </div>
-
-    <script>
-        const canvas = document.querySelector("#canvas");
-        const ctx = canvas.getContext("2d");
-        const undoButton = document.querySelector("#undo");
-        const clearButton = document.querySelector("#clear");
-        const colorPicker = document.querySelector("#color-picker");
-        const penWidth = document.querySelector("#pen-size");
-        const colorFields = document.querySelectorAll(".color-field");
-        const pdfUrl = document.querySelector("#pdf-url");
-        const loadPdfButton = document.querySelector("#load-pdf");
-        const pdfIframe = document.querySelector("#pdf");
-        // pdfIframe.setAttribute('width', '100%');
-        pdfIframe.width = `calc(100% - 100px)`;
-
-        let isDrawing = false;
-        let x = 0;
-        let y = 0;
-        let history = [];
-        let index = -1;
-
-        // canvas.width = window.innerWidth;
-        canvas.width = 1000;
-        canvas.height = window.innerHeight;
-        ctx.lineJoin = "round";
-        ctx.lineCap = "round";
-        ctx.lineWidth = penWidth.value;
-
-        function handleMouseDown(e) {
-            x = e.offsetX;
-            y = e.offsetY;
-            isDrawing = true;
-            index++;
-            history[index] = [];
-        }
-
-        function handleMouseMove(e) {
-            if (isDrawing === true) {
-                drawLine(ctx, x, y, e.offsetX, e.offsetY);
-                x = e.offsetX;
-                y = e.offsetY;
-                history[index].push({ x, y, color: ctx.strokeStyle, lineWidth: ctx.lineWidth });
-            }
-        }
-
-        function handleMouseUp(e) {
-            if (isDrawing === true) {
-                drawLine(ctx, x, y, e.offsetX, e.offsetY);
-                x = 0;
-                y = 0;
-                isDrawing = false;
-            }
-        }
-
-        function handleTouchStart(e) {
-            e.preventDefault();
-            var touch = e.targetTouches[0];
-            x = touch.pageX - touch.target.offsetLeft;
-            y = touch.pageY - touch.target.offsetTop;
-            isDrawing = true;
-            index++;
-            history[index] = [];
-        }
-
-        function handleTouchMove(e) {
-            e.preventDefault();
-            var touch = e.targetTouches[0];
-            if (isDrawing === true) {
-                drawLine(ctx, x, y, touch.pageX - touch.target.offsetLeft, touch.pageY - touch.target.offsetTop);
-                x = touch.pageX - touch.target.offsetLeft;
-                y = touch.pageY - touch.target.offsetTop;
-                history[index].push({ x, y, color: ctx.strokeStyle, lineWidth: ctx.lineWidth });
-            }
-        }
-
-        function handleTouchEnd(e) {
-            e.preventDefault();
-            if (isDrawing === true) {
-                drawLine(ctx, x, y, e.changedTouches[0].pageX - e.changedTouches[0].target.offsetLeft, e.changedTouches[0].pageY - e.changedTouches[0].target.offsetTop);
-                x = 0;
-                y = 0;
-                isDrawing = false;
-            }
-        }
-
-
-        function drawLine(context, x1, y1, x2, y2) {
-            context.beginPath();
-            context.strokeStyle = colorPicker.value;
-            context.lineWidth = penWidth.value;
-            context.moveTo(x1, y1);
-            context.lineTo(x2, y2);
-            context.stroke();
-            context.closePath();
-        }
-
-        function undo() {
-            if (index <= 0) {
-                clear();
-                toggleHiddenElements();
-                return;
-            }
-            index--;
-            history.pop();
-            clear();
-            redraw();
-            toggleHiddenElements();
-        }
-
-        function clear() {
-            ctx.clearRect(0, 0, canvas.width, canvas.height);
-            toggleHiddenElements();
-        }
-
-        function redraw() {
-            for (let i = 0; i < history.length; i++) {
-                for (let j = 0; j < history[i].length - 1; j++) {
-                    ctx.beginPath();
-                    ctx.strokeStyle = history[i][j].color;
-                    ctx.lineWidth = history[i][j].lineWidth;
-                    ctx.moveTo(history[i][j].x, history[i][j].y);
-                    ctx.lineTo(history[i][j + 1].x, history[i][j + 1].y);
-                    ctx.stroke();
-                    ctx.closePath();
-                }
-            }
-        }
-
-        canvas.addEventListener("mousedown", handleMouseDown);
-        canvas.addEventListener("mousemove", handleMouseMove);
-        window.addEventListener("mouseup", handleMouseUp);
-
-        canvas.addEventListener("touchstart", handleTouchStart);
-        canvas.addEventListener("touchmove", handleTouchMove);
-        canvas.addEventListener("touchend", handleTouchEnd);
-
-        undoButton.addEventListener("click", undo);
-        clearButton.addEventListener("click", clear);
-
-        colorFields.forEach((field) => {
-            field.addEventListener("click", (e) => {
-                // Reset the globalCompositeOperation property and update the strokeStyle property
-                ctx.globalCompositeOperation = "source-over";
-                ctx.strokeStyle = field.style.backgroundColor;
-
-                // Convert the backgroundColor property to a hexadecimal color value and update the colorPicker value
-                const rgb = e.target.style.backgroundColor;
-                const hex = rgbToHex(rgb);
-                colorPicker.value = hex;
-            });
-        });
-
-
-        function rgbToHex(rgb) {
-            // Use a regular expression to extract the red, green, blue, and alpha components from the input string
-            const [r, g, b, a] = rgb.match(/\d+(\.\d+)?/g).map(Number);
-
-            // Convert the red, green, and blue components to hexadecimal values
-            const [rHex, gHex, bHex] = [r, g, b].map((n) => n.toString(16).padStart(2, "0"));
-
-            // If the alpha component is present, convert it to a hexadecimal value
-            const aHex = a !== undefined ? (a * 255).toString(16).padStart(2, "0") : "";
-
-            // Return the concatenated hexadecimal color value
-            return "#" + rHex + gHex + bHex + aHex;
-        }
-
-
-
-        eraser.addEventListener("click", () => {
-            // Set the globalCompositeOperation property to "destination-out"
-            ctx.globalCompositeOperation = "destination-out";
-            toggleHiddenElements();
-        });
-
-        colorFields.forEach((field) => {
-            field.addEventListener("click", () => {
-                ctx.globalCompositeOperation = "source-over";
-                ctx.strokeStyle = field.style.backgroundColor;
-                toggleHiddenElements();
-            });
-        });
-
-        loadPdfButton.addEventListener("click", () => {
-            pdfIframe.src = 'https://docs.google.com/gview?embedded=true&url=' + pdfUrl.value + "#view=Fit&toolbar=0";
-        });
-
-// Read the data from data.json
-fetch('data.json')
-  .then(response => {
-    if (!response.ok) {
-      throw new Error(`An error occurred while loading data.json: ${response.status} ${response.statusText}`);
-    }
-    return response.json();
-  })
-  .then(data => {
-    // Generate the HTML for the navigation tree
-    const treeview = document.querySelector('.treeview');
-    const ul = document.createElement('ul');
-    generateTree(data, ul);
-    treeview.appendChild(ul);
-
-    // Add event listeners to the folders
-    const folders = treeview.querySelectorAll('.folder');
-    folders.forEach(folder => {
-      folder.addEventListener('click', (event) => {
-        if (event.target === folder) {
-          folder.classList.toggle('expanded');
-          folder.focus();
-        }
-      });
-    });
-  })
-  .catch(error => {
-    console.error(error);
-  });
-
-function generateTree(topics, parentUl) {
-  topics.forEach(topic => {
-    const li = document.createElement('li');
-    li.classList.add('folder');
-    li.setAttribute('data-name', topic.name);
-    li.textContent = topic.name;
-    parentUl.appendChild(li);
-
-    if (topic.subtopics && topic.subtopics.length > 0) {
-      const subUl = document.createElement('ul');
-      li.appendChild(subUl);
-      generateTree(topic.subtopics, subUl);
-    } else if (topic.titleTexts) {
-      topic.titleTexts.forEach(titleText => {
-        const subLi = document.createElement('li');
-        const a = document.createElement('a');
-        a.href = 'https://docs.google.com/gview?embedded=true&url=' + titleText.pdfUrl + "#view=Fit&toolbar=0";
-        a.target = "pdfFrame";
-        a.textContent = titleText.text;
-        subLi.appendChild(a);
-        parentUl.appendChild(subLi);
-      });
-    }
-  });
-}
-
-
-        const searchBox = document.getElementById('searchBox');
-        const searchButton = document.getElementById('searchButton');
-        searchButton.addEventListener('click', () => {
-            // Expand all folders and subfolders
-            const folders = document.querySelectorAll('.folder');
-            folders.forEach(folder => {
-                folder.classList.add('expanded');
-            });
-
-            const searchTerm = searchBox.value.toLowerCase();
-            const links = document.querySelectorAll('.treeview a');
-            links.forEach(link => {
-                if (link.textContent.toLowerCase().includes(searchTerm)) {
-                    link.parentElement.style.display = 'list-item';
-                    let parent = link.parentElement;
-                    while (parent && parent.classList.contains('folder')) {
-                        parent.classList.add('expanded');
-                        parent = parent.parentElement.parentElement;
-                    }
-                } else {
-                    link.parentElement.style.display = 'none';
-                }
-            });
-            folders.forEach(folder => {
-                if (!folder.querySelector(`a[href]:not([style*='display: none'])`)) {
-                    folder.classList.remove('expanded');
-                }
-            });
-        });
-
-
-        var penSizeWrapper1 = document.querySelector(".pen-size-slider");
-        var loadPdfWrapper1 = document.querySelector(".load-pdf-section");
-        var loadMenuWrapper1 = document.querySelector(".load-menu-section");
-
-        function togglePenSize() {
-            penSizeWrapper1.classList.toggle("hidden");
-            loadPdfWrapper1.classList.add("hidden");
-            loadMenuWrapper1.classList.add("hidden");
-        }
-
-        function toggleLoadPdf() {
-            loadPdfWrapper1.classList.toggle("hidden");
-            penSizeWrapper1.classList.add("hidden");
-            loadMenuWrapper1.classList.add("hidden");
-        }
-
-        function toggleLoadMenu() {
-            loadMenuWrapper1.classList.toggle("hidden");
-            penSizeWrapper1.classList.add("hidden");
-            loadPdfWrapper1.classList.add("hidden");
-        }
-
-        function toggleHiddenElements() {
-            loadMenuWrapper1.classList.add("hidden");
-            penSizeWrapper1.classList.add("hidden");
-            loadPdfWrapper1.classList.add("hidden");
-        }
-
-
-        // hide and show treeview from menu button
-        const showMenuButton = document.querySelector("#showMenu");
-        const treeview = document.querySelector(".treeview");
-
-/*         showMenuButton.addEventListener("click", () => {
-            treeview.classList.toggle("hidden");
-        }); */
-
-/* 
-        // Select all the elements within the hidden_elements div
-        const hiddenElements = document.querySelectorAll("#hidden_elements *");
-        // Select the canvas, iframeContainer, and pdf elements
-        const canvaz = document.querySelector("#canvas"); 
-        const iframeContainez = document.querySelector("#iframeContainer");
-        const pdfIframez = document.querySelector("#pdf");
-
-        // Add an event listener to each element
-        hiddenElements.forEach((element) => {
-        element.addEventListener("click", () => {
-            // Set the z-index of the element to a high value
-            element.style.zIndex = 9999;
-                    // Set the z-index of the elements to a low value
-            canvaz.style.zIndex = 0;
-            iframeContainez.style.zIndex = 0;
-            pdfIframez.style.zIndex = 0;
-        });
-        });
- */
-
-
-
-
-
-
-    </script>
 </body>
 
 </html>
