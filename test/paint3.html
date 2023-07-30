@@ -1,6 +1,12 @@
 <!DOCTYPE html>
+<!-- 
+when a page loads, save the drawing and clear the canvas
+
+
+-->
+
 <html>
- 
+
 <head>
     <title>Drawing App</title>
     <style>
@@ -474,70 +480,56 @@
         });
 
         loadPdfButton.addEventListener("click", () => {
-            pdfIframe.src = pdfUrl.value + "#view=Fit&toolbar=0";
+            pdfIframe.src = 'https://docs.google.com/gview?embedded=true&url=' + pdfUrl.value + "#view=Fit&toolbar=0";
         });
 
-        // Read the data from pdf_links.txt
-        fetch('pdf_links.txt')
-            .then(response => response.text())
-            .then(data => {
-                // Parse the data
-                const links = data.split('\n').map(line => {
-                    if (line.includes(',')) {
-                        const [pdfLink, folderPath] = line.split(',');
-                        const folders = folderPath.replace('https://', '').split('/').map(folderName => folderName.replace('\n', '').replace('\r', ''));
-                        return { pdfLink, folders };
-                    }
-                }).filter(link => link);
+        // Read the data from data.json
+        fetch('data.json')
+        .then(response => response.json())
+        .then(data => {
+            // Generate the HTML for the navigation tree
+            const treeview = document.querySelector('.treeview');
+            const ul = document.createElement('ul');
+            generateTree(data, ul);
+            treeview.appendChild(ul);
 
-                // Generate the HTML for the navigation tree
-                const treeview = document.querySelector('.treeview');
-                const ul = document.createElement('ul');
-                links.forEach(link => {
-                    let currentUl = ul;
-                    link.folders.forEach((folderName, index) => {
-                        let folder = currentUl.querySelector(`.folder[data-name="${folderName}"]`);
-                        if (!folder) {
-                            folder = document.createElement('li');
-                            folder.classList.add('folder');
-                            folder.setAttribute('data-name', folderName);
-                            folder.textContent = folderName;
-                            currentUl.appendChild(folder);
-                        }
-                        if (index === link.folders.length - 1) {
-                            const li = document.createElement('li');
-                            const a = document.createElement('a');
-                            a.href = 'https://docs.google.com/gview?embedded=true&url=' + link.pdfLink + "#view=Fit&toolbar=0";
-                            a.target = "pdfFrame";
-                            a.textContent = link.pdfLink.split('/').pop();
-                            li.appendChild(a);
-                            if (!folder.querySelector('ul')) {
-                                const subUl = document.createElement('ul');
-                                folder.appendChild(subUl);
-                            }
-                            folder.querySelector('ul').appendChild(li);
-                        } else {
-                            if (!folder.querySelector('ul')) {
-                                const subUl = document.createElement('ul');
-                                folder.appendChild(subUl);
-                            }
-                            currentUl = folder.querySelector('ul');
-                        }
-                    });
-                });
-                treeview.appendChild(ul);
-
-                // Add event listeners to the folders
-                const folders = treeview.querySelectorAll('.folder');
-                folders.forEach(folder => {
-                    folder.addEventListener('click', (event) => {
-                        if (event.target === folder) {
-                            folder.classList.toggle('expanded');
-                            folder.focus();
-                        }
-                    });
-                });
+            // Add event listeners to the folders
+            const folders = treeview.querySelectorAll('.folder');
+            folders.forEach(folder => {
+            folder.addEventListener('click', (event) => {
+                if (event.target === folder) {
+                folder.classList.toggle('expanded');
+                folder.focus();
+                }
             });
+            });
+        });
+
+        function generateTree(topics, parentUl) {
+        topics.forEach(topic => {
+            const li = document.createElement('li');
+            li.classList.add('folder');
+            li.setAttribute('data-name', topic.name);
+            li.textContent = topic.name;
+            parentUl.appendChild(li);
+
+            if (topic.subtopics.length > 0) {
+            const subUl = document.createElement('ul');
+            li.appendChild(subUl);
+            generateTree(topic.subtopics, subUl);
+            } else if (topic.titleTexts) {
+            topic.titleTexts.forEach(titleText => {
+                const subLi = document.createElement('li');
+                const a = document.createElement('a');
+                a.href = 'https://docs.google.com/gview?embedded=true&url=' + titleText.pdfUrl + "#view=Fit&toolbar=0";
+                a.target = "pdfFrame";
+                a.textContent = titleText.text;
+                subLi.appendChild(a);
+                parentUl.appendChild(subLi);
+            });
+            }
+        });
+        }
 
         const searchBox = document.getElementById('searchBox');
         const searchButton = document.getElementById('searchButton');
