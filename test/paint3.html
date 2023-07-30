@@ -521,7 +521,7 @@ function generateTree(topics, parentUl) {
     li.textContent = topic.name;
     parentUl.appendChild(li);
 
-    if (topic.subtopics.length > 0) {
+    if (topic.subtopics && topic.subtopics.length > 0) {
       const subUl = document.createElement('ul');
       li.appendChild(subUl);
       generateTree(topic.subtopics, subUl);
