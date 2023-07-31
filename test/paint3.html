@@ -1,14 +1,4 @@
 <!DOCTYPE html>
-<!-- 
-hook up the search button to the treeview
-lesson navigation
-page selection
-fix the undo button history
-user login if there is a drawing save it
-
-
--->
-
 <html>
 
 <head>
@@ -66,11 +56,11 @@ user login if there is a drawing save it
         .toolsContainer {
             position: fixed;
             top: 0px;
-            left: 0px;
+            left: 25px;
             right: 0;
             margin: 0 auto;
             display: flex;
-            justify-content: center;
+            /* justify-content: center; */
             align-items: flex-start;
         }
 
@@ -80,13 +70,28 @@ user login if there is a drawing save it
             z-index: 2;
             font-size: 40px;
             text-align: center;
-
         }
 
         .tool-column {
             display: inline-block;
-            margin-right: 40px;
+            margin-right: 35px;
             vertical-align: top;
+        }
+       
+        .load-previousPage {
+            display: inline-block;
+            margin-top: 15px;
+            margin-right: -15px;
+        }
+
+        .load-nextPage {
+            display: inline-block;
+            margin-top: 15px;
+        } 
+        
+        .send-Page {
+            display: inline-block;
+            margin-top: 15px;
         }
 
         #clear {
@@ -100,8 +105,8 @@ user login if there is a drawing save it
 
         .color-field {
             display: inline-block;
-            width: 55px;
-            height: 55px;
+            width: 52px;
+            height: 52px;
             margin-right: 5px;
             border-radius: 50%;
             cursor: pointer;
@@ -111,11 +116,6 @@ user login if there is a drawing save it
         .toggle-icon-pensize {
             display: inline-block;
             margin-top: 10px;
-        }
-
-        .toggle-load-pdf {
-            display: inline-block;
-            margin-top: 15px;
         }
 
         .toggle-load-menu {
@@ -131,14 +131,6 @@ user login if there is a drawing save it
             flex-direction: column;
             align-items: center; 
             */
-        }
-
-        .load-pdf-section {
-            display: flex;
-            flex-direction: row;
-            align-items: flex-start;
-            border: 4px solid grey;
-            padding: 15px 15px 15px 15px;
         }
 
         .load-menu-section {
@@ -221,7 +213,7 @@ user login if there is a drawing save it
             z-index: 3;
             background-color: rgba(255, 255, 255, 0.95);
             /* border: 4px solid grey; */
-            padding: 15px 15px 15px 15px; 
+            /* padding: 15px 15px 15px 15px;  */
         }
 
 
@@ -259,21 +251,38 @@ user login if there is a drawing save it
         li.folder.expanded>ul {
             display: block;
         }
+
+        .darkened-image {
+            background-image:url("https://static.thenounproject.com/png/854822-200.png");
+            background-size: 58px;
+            width:58px;
+            height:55px;
+            top:2px; 
+        }
+
     </style>
 </head>
 
 <body>
     <div class="toolsContainer">
         <div class="tools">
-
+    
             <div class="tool-column">
-                <!-- <button id="clear">Clear</button> -->
-                <img class='button-image' src="https://static.thenounproject.com/png/3513609-200.png" id="clear"
-                    alt="Clear" width="55" height="55" />
-                <!-- <button id="undo">Undo</button> https://static.thenounproject.com/png/3513609-200.png -->
-                <img class='button-image' src="https://static.thenounproject.com/png/1777983-200.png" id="undo"
-                    alt="Undo" width="55" height="55" />
-            </div>
+                <div class="toggle-load-menu button-image" onclick="toggleLoadMenu()">
+                    <img src="https://static.thenounproject.com/png/2891015-200.png" alt="searchMenu" onclick="searchMenu()"
+                        width="55" height="55" />
+                </div>
+                <div class="load-previousPage button-image">
+                    <img src="https://static.thenounproject.com/png/2891020-200.png" alt="previousPage" width="55" height="55" />
+                </div>
+                <div class="load-nextPage button-image">
+                    <img src="https://static.thenounproject.com/png/2891026-200.png" alt="nextPage"width="55" height="55" />
+                </div>
+                
+                <div class="send-Page button-image darkened-image">
+                    <img src="https://static.thenounproject.com/png/854822-200.png" alt="nextPage"width="55" height="58" style="position: relative; top: 2px; "  />
+                </div>
+           </div>
 
             <div class="tool-column">
                 <div class="color-field button-image" style="background-color: #000000;"></div>
@@ -281,29 +290,27 @@ user login if there is a drawing save it
                 <div class="color-field button-image" style="background-color: #FFA500;"></div>
                 <div class="color-field button-image" style="background-color: #008000;"></div>
                 <div class="color-field button-image" style="background-color: #0000FF;"></div>
-                <div class="color-field button-image" style="background-color: #800080;"></div>
-
-                <img class="button-image" src="https://static.thenounproject.com/png/75866-200.png" id="eraser"
-                    alt="eraser" width="65" height="65" style="position: relative; top: 6px;" />
 
                 <div class="toggle-icon-pensize button-image" onclick="togglePenSize()">
                     <img src="https://static.thenounproject.com/png/3366100-200.png" alt="penSize" width="60"
                         height="60" style="position: relative; top: 3px;" />
                 </div>
             </div>
-
+    
             <div class="tool-column">
-                <div class="toggle-load-pdf button-image" onclick="toggleLoadPdf()">
-                    <img src="https://static.thenounproject.com/png/781693-200.png" alt="hide-load-pdf" width="55"
-                        height="55" />
-                </div>
+                <img class="button-image" src="https://static.thenounproject.com/png/1072358-200.png" id="eraser"
+                    alt="eraser" width="52" height="52" style="position: relative; top: 5px;" />
 
-                <div class="toggle-load-menu button-image" onclick="toggleLoadMenu()">
-                    <img src="https://static.thenounproject.com/png/2929841-200.png" alt="searchMenu"
-                        onclick="searchMenu()" width="55" height="55" />
-                </div>
+                <img class='button-image' src="https://static.thenounproject.com/png/116976-200.png" id="undo"
+                    alt="Undo" width="50" height="45" />
             </div>
-
+    
+            <div class="tool-column">
+                <img class='button-image' src="https://static.thenounproject.com/png/1241129-200.png" id="clear"
+                    alt="Clear" width="50" height="55" />   <!-- 5384842 -->
+                   
+            </div>
+    
         </div>
     </div>
 
@@ -321,13 +328,12 @@ user login if there is a drawing save it
             <input type="range" id="pen-size" min="4" max="20" value="6" />
         </div>
 
-        <div class="load-pdf-section hidden ">
-            <input type="text" id="pdf-url" placeholder="Pdf Url here" />
-            <button id="load-pdf">Load PDF</button>
-        </div>
-
         <div class="load-menu-section hidden">
             <div class="search-container">
+                <input type="text" id="pdf-url" placeholder="Pdf Url here" />
+                <button id="load-pdf">Load PDF</button><br />
+            </div>
+            <div class="search-container">   
                 <input type="text" id="searchMenu" placeholder="Search Menu..." />
                 <button id="searchButton">Search</button><br />
             </div>
@@ -347,6 +353,8 @@ user login if there is a drawing save it
             const colorFields = document.querySelectorAll(".color-field");
             const pdfUrl = document.querySelector("#pdf-url");
             const loadPdfButton = document.querySelector("#load-pdf");
+            const loadPreviousPage = document.querySelector(".load-previousPage");
+            const loadNextPage = document.querySelector(".load-nextPage");
             const pdfIframe = document.querySelector("#pdf");
             // pdfIframe.setAttribute('width', '100%');
             pdfIframe.width = `calc(100% - 100px)`;
@@ -368,6 +376,18 @@ user login if there is a drawing save it
             ctx.lineCap = "round";
             ctx.lineWidth = penWidth.value;
 
+
+            loadPreviousPage.addEventListener("click", () => {
+                pdfIframe.src = 'https://docs.google.com/gview?embedded=true&url=https://www.k5learning.com/worksheets/math-drills/multiplication/multiply-big-numbers-a.pdf';
+                clear();
+            }); 
+
+            loadNextPage.addEventListener("click", () => {
+                pdfIframe.src = 'https://docs.google.com/gview?embedded=true&url=https://www.k5learning.com/worksheets/math-drills/multiplication/multiply-big-numbers-b.pdf';
+                clear(); 
+            });
+
+            
             function handleMouseDown(e) {
                 x = e.offsetX;
                 y = e.offsetY;
@@ -625,7 +645,6 @@ user login if there is a drawing save it
             });
 
             var penSizeWrapper1 = document.querySelector(".pen-size-slider");
-            var loadPdfWrapper1 = document.querySelector(".load-pdf-section");
             var loadMenuWrapper1 = document.querySelector(".load-menu-section");
             var closeButton1 = document.querySelector(".close-button");
             closeButton1.addEventListener('click', toggleHiddenElements);
@@ -634,14 +653,6 @@ user login if there is a drawing save it
             function togglePenSize() {
                 closeButton1.classList.toggle("hidden");
                 penSizeWrapper1.classList.toggle("hidden");
-                loadPdfWrapper1.classList.add("hidden");
-                loadMenuWrapper1.classList.add("hidden");
-            }
-
-            function toggleLoadPdf() {
-                closeButton1.classList.toggle("hidden");
-                loadPdfWrapper1.classList.toggle("hidden");
-                penSizeWrapper1.classList.add("hidden");
                 loadMenuWrapper1.classList.add("hidden");
             }
 
@@ -649,20 +660,19 @@ user login if there is a drawing save it
                 closeButton1.classList.toggle("hidden");
                 loadMenuWrapper1.classList.toggle("hidden");
                 penSizeWrapper1.classList.add("hidden");
-                loadPdfWrapper1.classList.add("hidden");
             }
 
             function toggleHiddenElements() {
                 closeButton1.classList.add("hidden");
                 loadMenuWrapper1.classList.add("hidden");
                 penSizeWrapper1.classList.add("hidden");
-                loadPdfWrapper1.classList.add("hidden");
                 setTimeout(() => {
                     clearButton.classList.remove('selected');
                     undoButton.classList.remove('selected');
+                    loadPreviousPage.classList.remove('selected');
+                    loadNextPage.classList.remove('selected');
                 }, 500);
             }
-
 
             // hide and show treeview from menu button
             const showMenuButton = document.querySelector("#showMenu");
@@ -671,20 +681,7 @@ user login if there is a drawing save it
 
         </script>
 
-        <!--    
-                        https://static.thenounproject.com/png/3157291-200.png
-                        https://static.thenounproject.com/png/2289902-200.png
-                        https://static.thenounproject.com/png/3015732-200.png
-                        2572372 stack of books
-                        5897913 internet stack of books 
-                        5256824 search book 
-                        2929841 page search 
-                        2908155 pdf page 
-                        3823862 pdf down
-                        781693 pdf link
-                        1586924 eraser  white
-                        https://static.thenounproject.com/png/75866-200.png eraser  dark
-                    -->
+
 
 </body>
 
