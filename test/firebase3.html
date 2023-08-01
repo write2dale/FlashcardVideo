@@ -28,7 +28,7 @@
             document.getElementById("status").innerHTML = "Logged in as " + user.displayName;
 
             // Store data in Firebase database
-            var database = firebase.database();
+            var database = firebase.database("https://worksheet-draw-default-rtdb.firebaseio.com");
             var ref = database.ref("users/" + user.uid);
             ref.set({
               text: "This is some text",
