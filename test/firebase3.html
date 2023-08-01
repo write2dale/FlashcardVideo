@@ -7,13 +7,22 @@
     <script src="https://www.gstatic.com/firebasejs/8.2.1/firebase-database.js"></script>
   </head>
   <body>
-    <h1>Firebase Test Page 4</h1>
+    <h1>Firebase Test Page 3</h1>
     <p id="status">Not logged in</p>
     <button id="googleSignInButton">Sign in with Google</button>
+    <button id="anonymousSignInButton">Sign in Anonymously</button>
+    <button id="phoneSignInButton">Sign in with Phone Number</button>
+    <div id="recaptcha-container"></div>
+    <input type="text" id="phoneNumber" placeholder="Enter phone number">
+    <input type="text" id="verificationCode" placeholder="Enter verification code">
+    <button id="verifyCodeButton">Verify Code</button>
     <button id="logoutButton" disabled>Logout</button>
     <button id="updateButton" disabled>Update Data</button>
     <script>
+        // Encode Firebase config as Base64 string
         var encodedConfig = "eyJhcGlLZXkiOiAiQUl6YVN5QVNjX2dGaWw3RkgwLWdOSWVHNS1UbFl6WWp0SkV1ZWpRIiwiYXV0aERvbWFpbiI6ICJ3b3Jrc2hlZXQtZHJhdy5maXJlYmFzZWFwcC5jb20iLCJwcm9qZWN0SWQiOiAid29ya3NoZWV0LWRyYXciLCJzdG9yYWdlQnVja2V0IjogIndvcmtzaGVldC1kcmF3LmFwcHNwb3QuY29tIiwibWVzc2FnaW5nU2VuZGVySWQiOiAiODY0NjIxNzE2NTM3IiwiYXBwSWQiOiAiMTo4NjQ2MjE3MTY1Mzc6d2ViOjhmMDhmYmMwNzhhNTZhODMzMzE5ZTgifQ==";
+
+        // Decode Firebase config from Base64 string
         var config = JSON.parse(atob(encodedConfig));
         firebase.initializeApp(config);
 
@@ -24,7 +33,7 @@
                 firebase.auth().onAuthStateChanged((user) => {
                     if (user) {
                         // User is signed in
-                        document.getElementById("status").innerHTML = "Logged in as " + user.displayName;
+                        document.getElementById("status").innerHTML = "Logged in as " + (user.displayName || "Anonymous");
                         document.getElementById("logoutButton").disabled = false;
                         document.getElementById("updateButton").disabled = false;
                     } else {
@@ -43,6 +52,72 @@
                             // Signed in
                             var user = result.user;
                             document.getElementById("status").innerHTML = "Logged in as " + user.displayName;
+                            document.getElementById("logoutButton").disabled = false;
+                            document.getElementById("updateButton").disabled = false;
+                        })
+                        .catch((error) => {
+                            // Handle Errors here.
+                            var errorCode = error.code;
+                            var errorMessage = error.message;
+                            document.getElementById("status").innerHTML = "Error: " + errorMessage;
+                        });
+                });
+
+                // Handle Anonymous Sign-In button click
+                document.getElementById("anonymousSignInButton").addEventListener("click", () => {
+                    firebase.auth().signInAnonymously()
+                        .then(() => {
+                            // Signed in
+                            document.getElementById("status").innerHTML = "Logged in as Anonymous";
+                            document.getElementById("logoutButton").disabled = false;
+                            document.getElementById("updateButton").disabled = false;
+                        })
+                        .catch((error) => {
+                            // Handle Errors here.
+                            var errorCode = error.code;
+                            var errorMessage = error.message;
+                            document.getElementById("status").innerHTML = "Error: " + errorMessage;
+                        });
+                });
+
+                // Handle Phone Sign-In button click
+                document.getElementById("phoneSignInButton").addEventListener("click", () => {
+                    // Render the reCAPTCHA widget
+                    window.recaptchaVerifier = new firebase.auth.RecaptchaVerifier('recaptcha-container', {
+                        'size': 'invisible',
+                        'callback': (response) => {
+                            // reCAPTCHA solved, allow signInWithPhoneNumber
+                            onSignInSubmit();
+                        }
+                    });
+
+                    // Get the phone number from the user
+                    var phoneNumber = document.getElementById("phoneNumber").value;
+
+                    // Send the verification code to the user's phone
+                    firebase.auth().signInWithPhoneNumber(phoneNumber, window.recaptchaVerifier)
+                        .then((confirmationResult) => {
+                            window.confirmationResult = confirmationResult;
+                        })
+                        .catch((error) => {
+                            // Handle Errors here.
+                            var errorCode = error.code;
+                            var errorMessage = error.message;
+                            document.getElementById("status").innerHTML = "Error: " + errorMessage;
+                        });
+                });
+
+                // Handle Verify Code button click
+                document.getElementById("verifyCodeButton").addEventListener("click", () => {
+                    // Get the verification code from the user
+                    var code = document.getElementById("verificationCode").value;
+
+                    // Confirm the verification code
+                    window.confirmationResult.confirm(code)
+                        .then((result) => {
+                            // Signed in
+                            var user = result.user;
+                            document.getElementById("status").innerHTML = "Logged in as " + user.phoneNumber;
                             document.getElementById("logoutButton").disabled = false;
                             document.getElementById("updateButton").disabled = false;
                         })
@@ -80,40 +155,50 @@
                         var database = firebase.database();
                         var ref = database.ref("users/" + user.uid);
 
-                        // Define an array of data to update
-                        var dataToUpdate = [
-                            {
-                                text: "This is some text",
-                                pdfUrl: "https://example.com/file1.pdf",
-                                timestamp: 1625140800,
-                                numOrder: 1
-                            },
-                            {
-                                text: "This is some new text",
-                                pdfUrl: "https://example.com/file1.pdf",
-                                timestamp: 1625227200,
-                                numOrder: 2
-                            },
-                            {
-                                text: "This is some more text",
-                                pdfUrl: "https://example.com/file1.pdf",
-                                timestamp: 1625184000,
-                                numOrder: 1.5
-                            }
-                        ];
+                        // Get the user's IP address
+                        fetch('https://api.ipify.org?format=json')
+                          .then(response => response.json())
+                          .then(data => {
+                              var ipAddress = data.ip;
 
-                        // Construct an object representing the updates
-                        var updates = {};
-                        for (var i = 0; i < dataToUpdate.length; i++) {
-                            // Generate a new unique key
-                            var newKey = ref.push().key;
+                              // Define an array of data to update
+                              var dataToUpdate = [
+                                  {
+                                      numOrder: 1,
+                                      text: "This is some text",
+                                      pdfUrl: "https://example.com/file1.pdf",
+                                      timestamp: 1625140800,
+                                      ipAddress: ipAddress
+                                  },
+                                  {
+                                      numOrder: 2,
+                                      text: "This is some new text",
+                                      pdfUrl: "https://example.com/file1.pdf",
+                                      timestamp: 1625227200,
+                                      ipAddress: ipAddress
+                                  },
+                                  {
+                                      numOrder: 1.5,
+                                      text: "This is some more text",
+                                      pdfUrl: "https://example.com/file1.pdf",
+                                      timestamp: 1625184000,
+                                      ipAddress: ipAddress
+                                  }
+                              ];
 
-                            // Add the new set of data to the updates object
-                            updates[newKey] = dataToUpdate[i];
-                        }
+                              // Construct an object representing the updates
+                              var updates = {};
+                              for (var i = 0; i < dataToUpdate.length; i++) {
+                                  // Generate a new unique key
+                                  var newKey = ref.push().key;
 
-                        // Update the user's data with all the updates in a single operation
-                        ref.update(updates);
+                                  // Add the new set of data to the updates object
+                                  updates[newKey] = dataToUpdate[i];
+                              }
+
+                              // Update the user's data with all the updates in a single operation
+                              ref.update(updates);
+                          });
                     }
                 });
             })
