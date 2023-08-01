@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>Firebase Test Page</title>
+    <script src="https://www.gstatic.com/firebasejs/8.2.1/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.2.1/firebase-auth.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.2.1/firebase-database.js"></script>
+  </head>
+  <body>
+    <h1>Firebase Test Page</h1>
+    <p id="status">Not logged in</p>
+    <button id="googleSignInButton">Sign in with Google</button>
+    <script>
+      // Encode Firebase config as Base64 string
+      var encodedConfig = "eyJhcGlLZXkiOiAiQUl6YVN5QVNjX2dGaWw3RkgwLWdOSWVHNS1UbFl6WWp0SkV1ZWpRIiwiYXV0aERvbWFpbiI6ICJ3b3Jrc2hlZXQtZHJhdy5maXJlYmFzZWFwcC5jb20iLCJwcm9qZWN0SWQiOiAid29ya3NoZWV0LWRyYXciLCJzdG9yYWdlQnVja2V0IjogIndvcmtzaGVldC1kcmF3LmFwcHNwb3QuY29tIiwibWVzc2FnaW5nU2VuZGVySWQiOiAiODY0NjIxNzE2NTM3IiwiYXBwSWQiOiAiMTo4NjQ2MjE3MTY1Mzc6d2ViOjhmMDhmYmMwNzhhNTZhODMzMzE5ZTgifQ==";
+
+      // Decode Firebase config from Base64 string
+      var config = JSON.parse(atob(encodedConfig));
+      firebase.initializeApp(config);
+
+      // Handle Google Sign-In button click
+      document.getElementById("googleSignInButton").addEventListener("click", () => {
+        var provider = new firebase.auth.GoogleAuthProvider();
+        firebase.auth().signInWithPopup(provider)
+          .then((result) => {
+            // Signed in
+            var user = result.user;
+            document.getElementById("status").innerHTML = "Logged in as " + user.displayName;
+
+            // Store data in Firebase database
+            var database = firebase.database();
+            var ref = database.ref("users/" + user.uid);
+            ref.set({
+              text: "This is some text",
+              pdfUrls: ["https://example.com/file1.pdf", "https://example.com/file2.pdf"]
+            });
+          })
+          .catch((error) => {
+            // Handle Errors here.
+            var errorCode = error.code;
+            var errorMessage = error.message;
+            document.getElementById("status").innerHTML = "Error: " + errorMessage;
+          });
+      });
+    </script>
+  </body>
+</html>
