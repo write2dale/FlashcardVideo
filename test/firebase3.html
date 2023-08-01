@@ -7,7 +7,7 @@
     <script src="https://www.gstatic.com/firebasejs/8.2.1/firebase-database.js"></script>
   </head>
   <body>
-    <h1>Firebase Test Page2</h1>
+    <h1>Firebase Test Page 3</h1>
     <p id="status">Not logged in</p>
     <button id="googleSignInButton">Sign in with Google</button>
     <script>
@@ -27,30 +27,54 @@
                     var user = result.user;
                     document.getElementById("status").innerHTML = "Logged in as " + user.displayName;
 
-                    // Store data in Firebase database
+                    // Get a reference to the user's data
                     var database = firebase.database();
                     var ref = database.ref("users/" + user.uid);
-                    ref.set({
-                        text: "This is some text 1",
-                        pdfUrls: ["https: 1", "https://example.com/file2.pdf"]
-                    }, function (error) {
-                        if (error) {
-                            // The write failed...
-                            console.log("Data could not be saved: " + error);
-                        } else {
-                            // Data saved successfully!
-                            console.log("Data saved successfully!");
-                        }
-                    });
 
-                })
-                .catch((error) => {
-                    // Handle Errors here.
-                    var errorCode = error.code;
-                    var errorMessage = error.message;
-                    document.getElementById("status").innerHTML = "Error: " + errorMessage;
-                });
-        });
+                    // Define an array of data to update
+                    var dataToUpdate = [
+                    {
+                        text: "This is some text",
+                        pdfUrls: ["https://example.com/file1.pdf", "https://example.com/file2.pdf"],
+                        timestamp: 1625140800,
+                        numOrder: 1
+                    },
+                    {
+                        text: "This is some new text",
+                        pdfUrls: ["https://example.com/file3.pdf", "https://example.com/file4.pdf"],
+                        timestamp: 1625227200,
+                        numOrder: 2
+                    },
+                    {
+                        text: "This is some more text",
+                        pdfUrls: ["https://example.com/file5.pdf", "https://example.com/file6.pdf"],
+                        timestamp: 1625184000,
+                        numOrder: 1.5
+                    }
+                    ];
+
+                    // Construct an object representing the updates
+                    var updates = {};
+                    for (var i = 0; i < dataToUpdate.length; i++) {
+                    // Generate a new unique key
+                    var newKey = ref.push().key;
+
+                    // Add the new set of data to the updates object
+                    updates[newKey] = dataToUpdate[i];
+                    }
+
+                    // Update the user's data with all the updates in a single operation
+                    ref.update(updates);
+
+
+                            })
+                            .catch((error) => {
+                                // Handle Errors here.
+                                var errorCode = error.code;
+                                var errorMessage = error.message;
+                                document.getElementById("status").innerHTML = "Error: " + errorMessage;
+                            });
+                    });
     </script>
   </body>
 </html>
